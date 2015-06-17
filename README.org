@@ -75,31 +75,6 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 
 - Visualize repo state.
 
-** TODOs
-*** TODO fix geschichte example						:bug:
-    :PROPERTIES:
-    :Assigned_to: kordano
-    :END:
-*** TODO go macros						    :feature:
-    :PROPERTIES:
-    :Assigned_to: whilo
-    :END:
-    - Note taken on [2015-06-17 Mi 13:07] \\
-      see full-async
-*** TODO build cljs repl					    :feature:
-    DEADLINE: <2015-06-19 Fr>
-    :PROPERTIES:
-    :Assigned_to: kordano 
-    :END:
-*** TODO fix pull-hooks							:bug:
-    :PROPERTIES:
-    :Assigned_to: whilo
-    :END:
-*** TODO create crdt bibliography				     :theory:
-    DEADLINE: <2015-06-22 Mo>
-    :PROPERTIES:
-    :Assigned_to: whilo
-    :END:
 ** Roadmap
 
 - Atomic cross-CRDT updates.
@@ -119,6 +94,31 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 - Evaluate lowest-common-ancestor algorithms if merging becomes too expansive.
   See also [[http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext][lca in haskell (including repository monad)]]
 
+*** TODOs
+**** TODO fix geschichte example 					:bug:
+    :PROPERTIES:
+    :Assigned_to: kordano
+    :END:
+**** TODO go macros 						    :feature:
+    :PROPERTIES:
+    :Assigned_to: whilo
+    :END:
+    - Note taken on [2015-06-17 Mi 13:07] \\
+      see full-async
+**** TODO build cljs repl 					    :feature:
+    DEADLINE: <2015-06-19 Fr>
+    :PROPERTIES:
+    :Assigned_to: kordano 
+    :END:
+**** TODO fix pull-hooks 						:bug:
+    :PROPERTIES:
+    :Assigned_to: whilo
+    :END:
+**** TODO create crdt bibliography 				     :theory:
+    DEADLINE: <2015-06-22 Mo>
+    :PROPERTIES:
+    :Assigned_to: whilo
+    :END:
 ** License
 
 Copyright © 2013-2015 Christian Weilbach & Konrad Kühne
