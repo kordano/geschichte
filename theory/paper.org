@@ -1,3 +1,5 @@
+#+STARTUP: overview 
+#+STARTUP: hidestars
 * Introduction
 ** Motivation
 :PROPERTIES:

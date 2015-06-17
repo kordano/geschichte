@@ -1,4 +1,10 @@
-# geschichte
+#+TAGS: bug feature review
+#+TODO: TODO(t) STARTED(s) DONE(d) 
+#+TODO: CANCELED(c@)
+#+CATEGORY: geschichte
+#+STARTUP: overview 
+#+STARTUP: hidestars
+* geschichte
 
 `geschichte` (meaning history in German) is a distributed eventual consistent database for web applications. Instead of programming thin web-clients around a central server/cloud, you operate on your local data like a native application both on client- and (if you wish to) server-side. You can also view it in reverse as a cloud being expanded to all end-points.
 Commit whenever you want and access values whenever you want no matter if the remote peer (server) is *available* or not. You can imagine it as a `git` for [edn](https://github.com/edn-format/edn) database + automatic eventual consistent synchronization. The motivation is to share data openly and develop applications on shared well-defined data carrying over the immutable value semantics of [Clojure](http://clojure.org/). This allows not only to fork code, but much more importantly to fork the data of applications and extend it in unplanned ways.
@@ -6,11 +12,11 @@ The tradeoff is that your application may have to support after-the-fact conflic
 
 A prototype application, with an example deployment, can be found here: [topiq](https://github.com/ghubber/topiq).
 
-## Usage
+** Usage
 
 Use this to store your application state, e.g. with `datascript` and `om`, to easily compose applications and data. You need to create a `peer` and potentially a `stage` or `pull-hooks`.
 
-## Design
+** Design
 
 geschichte consists of two parts, a core of [CRDTs](http://hal.inria.fr/docs/00/55/55/88/PDF/techreport.pdf), especially a new design for a repository in the `geschichte.crdt.repo` namespaces, and a generic replication protocol for CRDTs in `geschichte.replicate` and some middlewares. The replication can be extended for any CRDT and we will try to provide as many implementations as possible by default. Together the CRDTs and the replication provide conflict-free synchronization. They decouple resolution of application level conflicts from synchronization over a network.
 
@@ -24,11 +30,11 @@ For detailed documentation of the repository CRDT look at the [introduction](htt
 
 For the special repository CRDT implicit conflicts might occur (if a device is offline for instance). But committing to the same CRDT on different peers in general is not supposed to be the best way to organize distributed writes. Instead, explicit pulling or merging between branches or users allows for supervised pulls or merges under each user's control, e.g. through pull-hooks or supervised on stage.
 
-## Twisting CAP
+** Twisting CAP
 
 Having distributed writes in any system puts it under the restrictions of the [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem). Similar to `git` there is no design-level decision of how to deal with breaks of consistency and how to modulate convergence. So feel free to organize different write schemes, from a singular writer like Datomic to a totally distributed landscape of non-consistent always available repositories (like git) are possible. Ideally some preconfigurable schemes should emerge.
 
-### Scheme 0: Personal applications
+*** Scheme 0: Personal applications
 
 For "high-level", low write-throughput data (like a port of a classical desktop application for personal data management) which is not immediately synchronized in a global state between several users by your application, everything is fine and you don't need to worry about CAP. An example would be a personal address book manager, a personal todo app, ... All you need to do is cover conflict resolution.
 
@@ -47,13 +53,13 @@ The **coordinator**:
 Latency differences between users together with a high volume of writes can cause the network to diverge, because high latency peers have no chance anymore to be pulled from and diverge from the coordinator. To avoid a runaway effect in this scenario we introduce a delay cost to merge gradually rising with the ratio of merges vs. normal commits in the repository on user-side. In CAP terms we reduce availability, but do not directly gain consistency, only limit divergence.
 In this scenario the application is supposed to notify each user about the diverged state and if this persists, recommend joining a lower write-intensive coordinator. Coordinators then form a tree around the central coordinator themselves being users. This reassignment can be done automatically on server side (but has not been worked out yet) corresponding to load-balancing, a P2P load-balancer is also conceivable.
 
-## JavaScript
+** JavaScript
 
 It is supposed to work from JavaScript as well, ping me and I will have a look what is necessary to make interop more painfree if you have problems.
 
 *Any help or patches are very welcome :-)*
 
-## TODO for a first release
+** TODOs for a first release
 
 - Define CRDT Algebra for synching and repo. Use downstream ops of INRIA techreport [DONE]
 - Allow dual op-based vs. state-based representation of a CRDT for constant time synching [DONE]
@@ -66,7 +72,31 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 
 - Visualize repo state.
 
-# Roadmap
+
+** TODOs
+*** TODO fix geschichte example 
+*** TODO go macros
+    - Note taken on [2015-06-17 Mi 13:07] \\
+      see full-async
+*** TODO build cljs repl
+  DEADLINE: <2015-06-19 Fr>
+  :PROPERTIES:
+  :ID:       a91a7a73-41e4-40b3-bc2a-0560fa981a77
+  :END:
+*** TODO pull-hooks
+*** TODO crdt bibliography
+ DEADLINE: <2015-06-22 Mo>
+*** TODO refactor example worksheet 				  :worksheet:
+  DEADLINE: <2015-06-28 So>
+  :PROPERTIES:
+  :Created: [2015-06-16 Di 14:10]
+  :Assigned: konny
+  :END:
+
+
+
+
+** Roadmap
 
 - Atomic cross-CRDT updates.
 - Partially propagate updates and allow them to be delayed and reassembled again to stay atomic?
@@ -85,7 +115,7 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 - Evaluate lowest-common-ancestor algorithms if merging becomes too expansive.
   See also [lca in haskell (including repository monad)](http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext)
 
-## License
+** License
 
 Copyright © 2013-2015 Christian Weilbach & Konrad Kühne
 
