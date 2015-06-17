@@ -1,17 +1,19 @@
-#+TAGS: bug feature review
+#+TITLE: geschichte
+#+TAGS: bug feature review theory
 #+TODO: TODO(t) STARTED(s) DONE(d) 
 #+TODO: CANCELED(c@)
 #+CATEGORY: geschichte
 #+STARTUP: overview 
 #+STARTUP: hidestars
+#+PROPERTY: Assigned_to_ALL kordano whilo
 
 * geschichte
 
 `geschichte` (meaning history in German) is a distributed eventual consistent database for web applications. Instead of programming thin web-clients around a central server/cloud, you operate on your local data like a native application both on client- and (if you wish to) server-side. You can also view it in reverse as a cloud being expanded to all end-points.
-Commit whenever you want and access values whenever you want no matter if the remote peer (server) is *available* or not. You can imagine it as a `git` for [edn](https://github.com/edn-format/edn) database + automatic eventual consistent synchronization. The motivation is to share data openly and develop applications on shared well-defined data carrying over the immutable value semantics of [Clojure](http://clojure.org/). This allows not only to fork code, but much more importantly to fork the data of applications and extend it in unplanned ways.
-The tradeoff is that your application may have to support after-the-fact conflict resolution, which can be achieved fairly easily with strict data-models like [datascript](https://github.com/tonsky/datascript), but in some cases users will have to decide conflicts.
+Commit whenever you want and access values whenever you want no matter if the remote peer (server) is *available* or not. You can imagine it as a `git` for [[https://github.com/edn-format/edn][edn]] database + automatic eventual consistent synchronization. The motivation is to share data openly and develop applications on shared well-defined data carrying over the immutable value semantics of [[http://clojure.org/][Clojure]]. This allows not only to fork code, but much more importantly to fork the data of applications and extend it in unplanned ways.
+The tradeoff is that your application may have to support after-the-fact conflict resolution, which can be achieved fairly easily with strict data-models like [[https://github.com/tonsky/datascript][datascript]], but in some cases users will have to decide conflicts.
 
-A prototype application, with an example deployment, can be found here: [topiq](https://github.com/ghubber/topiq).
+A prototype application, with an example deployment, can be found here: [[(https://github.com/ghubber/topiq][topiq]].
 
 ** Usage
 
@@ -33,7 +35,7 @@ For the special repository CRDT implicit conflicts might occur (if a device is o
 
 ** Twisting CAP
 
-Having distributed writes in any system puts it under the restrictions of the [CAP theorem](https://en.wikipedia.org/wiki/CAP_theorem). Similar to `git` there is no design-level decision of how to deal with breaks of consistency and how to modulate convergence. So feel free to organize different write schemes, from a singular writer like Datomic to a totally distributed landscape of non-consistent always available repositories (like git) are possible. Ideally some preconfigurable schemes should emerge.
+Having distributed writes in any system puts it under the restrictions of the [[https://en.wikipedia.org/wiki/CAP_theorem][CAP theorem]]. Similar to `git` there is no design-level decision of how to deal with breaks of consistency and how to modulate convergence. So feel free to organize different write schemes, from a singular writer like Datomic to a totally distributed landscape of non-consistent always available repositories (like git) are possible. Ideally some preconfigurable schemes should emerge.
 
 *** Scheme 0: Personal applications
 
@@ -73,30 +75,31 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 
 - Visualize repo state.
 
-
 ** TODOs
-*** TODO fix geschichte example 
-*** TODO go macros
+*** TODO fix geschichte example						:bug:
+    :PROPERTIES:
+    :Assigned_to: kordano
+    :END:
+*** TODO go macros						    :feature:
+    :PROPERTIES:
+    :Assigned_to: whilo
+    :END:
     - Note taken on [2015-06-17 Mi 13:07] \\
       see full-async
-*** TODO build cljs repl
-  DEADLINE: <2015-06-19 Fr>
-  :PROPERTIES:
-  :ID:       a91a7a73-41e4-40b3-bc2a-0560fa981a77
-  :END:
-*** TODO fix pull-hooks
-*** TODO create crdt bibliography
- DEADLINE: <2015-06-22 Mo>
-*** TODO refactor example worksheet 				  :worksheet:
-  DEADLINE: <2015-06-28 So>
-  :PROPERTIES:
-  :Created: [2015-06-16 Di 14:10]
-  :Assigned: kordano
-  :END:
-
-
-
-
+*** TODO build cljs repl					    :feature:
+    DEADLINE: <2015-06-19 Fr>
+    :PROPERTIES:
+    :Assigned_to: kordano 
+    :END:
+*** TODO fix pull-hooks							:bug:
+    :PROPERTIES:
+    :Assigned_to: whilo
+    :END:
+*** TODO create crdt bibliography				     :theory:
+    DEADLINE: <2015-06-22 Mo>
+    :PROPERTIES:
+    :Assigned_to: whilo
+    :END:
 ** Roadmap
 
 - Atomic cross-CRDT updates.
@@ -114,7 +117,7 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 - Make peers and stage records(?).
 - Implement diverse prototypes, from real-time to "big-data".
 - Evaluate lowest-common-ancestor algorithms if merging becomes too expansive.
-  See also [lca in haskell (including repository monad)](http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext)
+  See also [[http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext][lca in haskell (including repository monad)]]
 
 ** License
 
