@@ -1,5 +1,5 @@
 #+TITLE: geschichte
-#+TAGS: bug feature review theory
+#+TAGS: bug feature review theory refactor
 #+TODO: TODO(t) STARTED(s!) DONE(d!) 
 #+TODO: CANCELED(c@)
 #+CATEGORY: geschichte
@@ -13,11 +13,11 @@ The tradeoff is that your application may have to support after-the-fact conflic
 
 A prototype application, with an example deployment, can be found here: [[(https://github.com/ghubber/topiq][topiq]].
 
-***** Usage
+*** Usage
 
 Use this to store your application state, e.g. with `datascript` and `om`, to easily compose applications and data. You need to create a `peer` and potentially a `stage` or `pull-hooks`.
 
-***** Design
+*** Design
 
 geschichte consists of two parts, a core of [CRDTs](http://hal.inria.fr/docs/00/55/55/88/PDF/techreport.pdf), especially a new design for a repository in the `geschichte.crdt.repo` namespaces, and a generic replication protocol for CRDTs in `geschichte.replicate` and some middlewares. The replication can be extended for any CRDT and we will try to provide as many implementations as possible by default. Together the CRDTs and the replication provide conflict-free synchronization. They decouple resolution of application level conflicts from synchronization over a network.
 
@@ -27,19 +27,19 @@ We make heavy use of [core.async](https://github.com/clojure/core.async) to mode
 
 For detailed documentation of the repository CRDT look at the [introduction](http://ghubber.github.io/geschichte/). Or to understand the [pub-sub message protocol for synching](http://ghubber.github.io/geschichte/synching.html).
 
-**** Repository CRDT
+*** Repository CRDT
 
 For the special repository CRDT implicit conflicts might occur (if a device is offline for instance). But committing to the same CRDT on different peers in general is not supposed to be the best way to organize distributed writes. Instead, explicit pulling or merging between branches or users allows for supervised pulls or merges under each user's control, e.g. through pull-hooks or supervised on stage.
 
-***** Twisting CAP
+**** Twisting CAP
 
 Having distributed writes in any system puts it under the restrictions of the [[https://en.wikipedia.org/wiki/CAP_theorem][CAP theorem]]. Similar to `git` there is no design-level decision of how to deal with breaks of consistency and how to modulate convergence. So feel free to organize different write schemes, from a singular writer like Datomic to a totally distributed landscape of non-consistent always available repositories (like git) are possible. Ideally some preconfigurable schemes should emerge.
 
-****** Scheme 0: Personal applications
+**** Scheme 0: Personal applications
 
 For "high-level", low write-throughput data (like a port of a classical desktop application for personal data management) which is not immediately synchronized in a global state between several users by your application, everything is fine and you don't need to worry about CAP. An example would be a personal address book manager, a personal todo app, ... All you need to do is cover conflict resolution.
 
-****** Scheme 1: Tree of coordinators
+**** Scheme 1: Tree of coordinators
 
 The currently supposed coordination around writes is a Linux kernel-development inspired tree like structure of synching groups consisting of one central user (e.g. user corresponding to the state of the application/database on the server) we call the `coordinator`.
 
@@ -54,15 +54,13 @@ The **coordinator**:
 Latency differences between users together with a high volume of writes can cause the network to diverge, because high latency peers have no chance anymore to be pulled from and diverge from the coordinator. To avoid a runaway effect in this scenario we introduce a delay cost to merge gradually rising with the ratio of merges vs. normal commits in the repository on user-side. In CAP terms we reduce availability, but do not directly gain consistency, only limit divergence.
 In this scenario the application is supposed to notify each user about the diverged state and if this persists, recommend joining a lower write-intensive coordinator. Coordinators then form a tree around the central coordinator themselves being users. This reassignment can be done automatically on server side (but has not been worked out yet) corresponding to load-balancing, a P2P load-balancer is also conceivable.
 
-***** JavaScript
+*** JavaScript
 
 It is supposed to work from JavaScript as well, ping me and I will have a look what is necessary to make interop more painfree if you have problems.
 
 *Any help or patches are very welcome :-)*
 
-***** TODOs for a first release
-
-***** Roadmap
+*** Roadmap
 - Atomic cross-CRDT updates.
 - Partially propagate updates and allow them to be delayed and reassembled again to stay atomic?
 - Make usage from JavaScript straightforward (including JSON values). Browser and nodejs.
@@ -79,34 +77,41 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 - Implement diverse prototypes, from real-time to "big-data".
 - Evaluate lowest-common-ancestor algorithms if merging becomes too expansive.
   See also [[http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext][lca in haskell (including repository monad)]]
-****** TODOs
-******* STARTED fix geschichte example 				:bug:
+***** TODOs
+****** STARTED fix geschichte example 				:bug:
      - State "STARTED"    from "TODO"       [2015-06-17 Mi 17:50]
     :PROPERTIES:
     :Assigned_to: kordano
     :END:
-******* TODO go macros 					    :feature:
+****** TODO go macros 					    :feature:
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
     - Note taken on [2015-06-17 Mi 13:07] \\
       see full-async
-******* TODO build cljs repl 					    :feature:
+****** TODO build cljs repl 					    :feature:
     DEADLINE: <2015-06-26 Fr>
     :PROPERTIES:
     :Assigned_to: kordano 
     :END:
-******* TODO fix pull-hooks 						:bug:
+****** TODO fix pull-hooks 						:bug:
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
-******* TODO create crdt bibliography 				     :theory:
-    DEADLINE: <2015-06-28 So>
+****** TODO create crdt bibliography 				     :theory:
+       DEADLINE: <2015-06-28 So>
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
-
-***** License
+****** DONE Define CRDT Algebra for synching and repo. Use downstream ops of INRIA techreport [DONE] :feature:
+****** DONE Allow dual op-based vs. state-based representation of a CRDT for constant time synching [DONE] :feature:
+****** DONE Give message exchanges unique id to track pub-sub exchanges without network topology. [DONE] :feature:
+****** DONE Visualize repo state. [DONE] :feature:
+****** STARTED Refactor core replication to break apart from repository CRDT [MOSTLY DONE] :refactor:
+****** TODO Handle tag-table for messaging (transit?). :feature:
+****** TODO Rename all messaging: remove ambiguous "meta" terminology :meta-pub -> :crdt/pub, :metas->:pubs, :transactions -> :prepared (?) ..., :downstream vs. :op :refactor:
+****** TODO Reactivate cljs port :bug:
+**** License
 
 Copyright © 2013-2015 Christian Weilbach & Konrad Kühne
 
