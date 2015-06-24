@@ -61,11 +61,12 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 *Any help or patches are very welcome :-)*
 
 *** Roadmap
+- Implement some useful CRDTs from techreview and other papers and ship by default.
+- Restructure stage and its CRDT state representation.
 - Atomic cross-CRDT updates.
 - Partially propagate updates and allow them to be delayed and reassembled again to stay atomic?
 - Make usage from JavaScript straightforward (including JSON values). Browser and nodejs.
 - Passwordless authentication (and authorisation) based on email verification or password and inter-peer trust network as p2p middleware.
-- Implement useful CRDTs from techreview and other papers and ship by default.
 - Allow management of subscriptions of peers.
 - Limit inline value size, avoid pulling huge fetched values in memory. Distribute bandwidth between CRDTs.
 - Negotiate middlewares with versioning.
