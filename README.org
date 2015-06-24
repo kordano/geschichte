@@ -109,7 +109,8 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 ****** DONE Visualize repo state. [DONE] :feature:
 ****** STARTED Refactor core replication to break apart from repository CRDT [MOSTLY DONE] :refactor:
 ****** TODO Handle tag-table for messaging (transit?). :feature:
-****** TODO Rename all messaging: remove ambiguous "meta" terminology :meta-pub -> :crdt/pub, :metas->:pubs, :transactions -> :prepared (?) ..., :downstream vs. :op :refactor:
+****** TODO Rename all messaging: :refactor: 
+remove ambiguous "meta" terminology :meta-pub -> :crdt/pub, :metas->:pubs, :transactions -> :prepared (?) ..., :downstream vs. :op
 ****** TODO Reactivate cljs port :bug:
 **** License
 
