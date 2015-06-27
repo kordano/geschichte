@@ -106,7 +106,7 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
     - Note taken on [2015-06-17 Mi 13:07] \\
       see full-async
 **** TODO build cljs repl 					    :feature:
-    DEADLINE: <2015-06-19 Fr>
+    DEADLINE: <2015-07-04 Sa>
     :PROPERTIES:
     :Assigned_to: kordano 
     :END:
@@ -115,7 +115,7 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
     :Assigned_to: whilo
     :END:
 **** TODO create crdt bibliography 				     :theory:
-    DEADLINE: <2015-06-22 Mo>
+    DEADLINE: <2015-07-05 So>
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
