@@ -23,7 +23,7 @@ Use this to store your application state, e.g. with =datascript= and =om=, to ea
 
 The replication protocol partitions the global state space into user specific places for CRDTs, =[email crdt-id]=, possibly further dividing this inside the CRDT into identities (e.g. branches). All replication happens between these places. All peers automatically synchronize CRDTs of each user they subscribe to and push changes as soon as they have all data.
 
-We make heavy use of [[https://github.com/clojure/core.async][core.async]] to model peers platform- and network-agnostic just as peers having a pair of messaging channels for =edn= messages. We build on platform-neutral durable storage through [[https://github.com/ghubber/konserve][konserve]]. At the core is a `pub-sub` scheme between peers, but most functionality is factored into `middlewares` filtering and tweaking the in/out channel pair of each peers pub-sub core. This allows decoupled extension of the network protocol.
+We make heavy use of [[https://github.com/clojure/core.async][core.async]] to model peers platform- and network-agnostic just as peers having a pair of messaging channels for =edn= messages. We build on platform-neutral durable storage through [[https://github.com/ghubber/konserve][konserve]]. At the core is a =pub-sub= scheme between peers, but most functionality is factored into =middlewares= filtering and tweaking the in/out channel pair of each peers pub-sub core. This allows decoupled extension of the network protocol.
 
 For detailed documentation of the repository CRDT look at the [[http://ghubber.github.io/replikativ/][introduction]]. Or to understand the [[http://ghubber.github.io/replikativ/synching.html][pub-sub message protocol for synching]].
 
