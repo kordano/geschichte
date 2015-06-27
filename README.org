@@ -79,9 +79,9 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
   See also [[http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext][lca in haskell (including repository monad)]]
 
 **** TODOs
-****** TODO Handle tag-table for messaging of records (transit?).   :feature:
-****** TODO Reactivate cljs port 					:bug:
-****** TODO Rename all messaging: remove ambiguous "meta" terminology :refactor:
+***** TODO Handle tag-table for messaging of records (transit?).   :feature:
+***** TODO Reactivate cljs port :bug:
+***** TODO Rename all messaging: remove ambiguous "meta" terminology :refactor:
        suggestions: 
 - conflict-free rdt -> convergent rdt (because the repo models internal conflicts, this could be confusing)
 - :meta-sub -> :sub/crdts or :sub/identities? (allow other subscription topics)
@@ -92,31 +92,31 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 - :op (in publication) -> :downstream (because the operation is actually always a downstream operation)
 - :transactions -> :prepared (transaction is confusing and might be misunderstood as already applied, while :prepared makes clear that the operation is not yet applied.)
 
-****** TODO create crdt bibliography 				     :theory:
+***** TODO create crdt bibliography 				     :theory:
        DEADLINE: <2015-07-05 So>
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
-****** STARTED fix geschichte example 					:bug:
+***** STARTED fix geschichte example 				:bug:
      - State "STARTED"    from "TODO"       [2015-06-17 Mi 17:50]
     :PROPERTIES:
     :Assigned_to: kordano
     :END:
-****** TODO go macros 						    :feature:
+***** TODO go macros 					    :feature:
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
     - Note taken on [2015-06-17 Mi 13:07] \\
       see full-async
-****** TODO fix pull-hooks 						:bug:
+***** TODO fix pull-hooks 						:bug:
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
-****** DONE Define CRDT Algebra for synching and repo. Use downstream ops of INRIA techreport [DONE] :feature:
-****** DONE Allow dual op-based vs. state-based representation of a CRDT for constant time synching [DONE] :feature:
-****** DONE Give message exchanges unique id to track pub-sub exchanges without network topology. [DONE] :feature:
-****** DONE Visualize repo state. [DONE] 			    :feature:
-****** DONE Refactor core replication to break apart from repository CRDT [DONE] :refactor:
+***** DONE Define CRDT Algebra for synching and repo. Use downstream ops of INRIA techreport [DONE] :feature:
+***** DONE Allow dual op-based vs. state-based representation of a CRDT for constant time synching [DONE] :feature:
+***** DONE Give message exchanges unique id to track pub-sub exchanges without network topology. [DONE] :feature:
+***** DONE Visualize repo state. [DONE] :feature:
+***** DONE Refactor core replication to break apart from repository CRDT [DONE] :refactor:
 
 **** License
 
