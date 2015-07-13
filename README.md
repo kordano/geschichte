@@ -8,6 +8,9 @@ A prototype application, with an example deployment, can be found here: [topiq](
 
 ## Usage
 
+Add this to your project dependencies:
+[![Clojars Project](http://clojars.org/es.topiq/replikativ/latest-version.svg)](http://clojars.org/es.topiq/replikativ)
+
 Use this to store your application state, e.g. with `datascript` and `om`, to easily compose applications and data. You need to create a `peer` and potentially a `stage` or `pull-hooks`.
 
 ## Design
@@ -60,28 +63,31 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 - Give message exchanges unique id to track pub-sub exchanges without network topology. [DONE]
 - Visualize repo state. [DONE]
 - Refactor core replication to break apart from repository CRDT [DONE]
+- Automatically track atomic cross-CRDT references inside commit values. [DONE]
 - Rename all messaging: remove ambiguous "meta" terminology, suggestions:
   - conflict-free rdt -> convergent rdt (because the repo models internal conflicts, this could be confusing)
   - :topic -> :type
   - :meta-sub -> :sub/identities (allow other subscription topics)
+  - :meta-sub -> :subscriptions
   - :meta-pub -> :pub/downstream (allow other publication topics)
   - :connect -> :connect/peer
-  - :fetch -> :fetch/values, :fetch/binary
+  - :fetch -> :fetch/edn, :fetch/binary
   - :metas (sub) -> :identities
   - :metas (pub) -> :downstream
   - :causal-order (of repo) -> :commit-graph (because that is what it is for this datatype, it corresponds to the causal-history for the crdt, but this is confusing and not specific enough)
   - :op (in publication) -> :downstream (because the operation is actually always a downstream operation)
-  - :transactions -> :prepared (transaction is confusing and might be misunderstood as already applied, while :prepared makes clear that the operation is not yet applied.)
-- Reactivate cljs port
-- Handle tag-table for messaging of records (transit?).
+  - stage :transactions -> :prepared (transaction is confusing and might be misunderstood as already applied, while :prepared makes clear that the operation is not yet applied.) [DONE]
+- Reactivate cljs: port full.async macros, add missing cljs code
+- Handle tag-table for messaging of records (transit?). Make all CRDT references records?
+- Implement OR-set for topiq to mix strong and weak consistency
 
 
 # Roadmap
 
-- Implement some useful CRDTs (OR-set, vector-clock, ...) from techreview and other papers and ship by default.
 - Passwordless authentication (and authorisation) based on email verification or password and inter-peer trust network as p2p middleware.
-- Restructure stage and its CRDT state representation.
-- Atomic cross-CRDT updates. Partially propagate updates and allow them to be delayed and reassembled again to stay atomic?
+- Implement usefeul CRDTs (LWW-register, counter, vector-clock, ...) from techreview and other papers and ship by default.
+- Improve error-handling and handle reconnections gracefully.
+- Safe atomic cross-CRDT updates. Partially propagate updates and allow them to be delayed and reassembled again to stay atomic?
 - Make usage from JavaScript straightforward (including JSON values). Browser and nodejs.
 - Allow management of subscriptions of peers.
 - Limit inline value size, avoid pulling huge fetched values in memory. Distribute bandwidth between CRDTs.

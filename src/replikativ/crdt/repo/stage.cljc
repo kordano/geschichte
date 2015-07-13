@@ -7,14 +7,13 @@
               [replikativ.crdt.repo.impl :as impl]
               [replikativ.crdt.repo.meta :as meta]
               [replikativ.platform-log :refer [debug info warn]]
-              [replikativ.platform :refer [<? go<? go>? go-loop>? go-loop<?]]
+              [full.async :refer [go-try <?]]
               [hasch.core :refer [uuid]]
               [clojure.set :as set]
               #?(:clj [clojure.core.async :as async
-                       :refer [<! <!! >! timeout chan alt! go put! go-loop sub unsub pub close!]]
+                       :refer [>! timeout chan put! sub unsub pub close!]]
                  :cljs [cljs.core.async :as async
-                        :refer [<! >! timeout chan put! sub unsub pub close!]]))
-    #?(:cljs (:require-macros [cljs.core.async.macros :refer [go go-loop alt!]])))
+                        :refer [>! timeout chan put! sub unsub pub close!]])))
 
 
 (defn create-repo! [stage & {:keys [user is-public? branch id description]
@@ -23,20 +22,20 @@
                                   description ""}}]
   "Create a repo given a description. Defaults to stage user and
   new-repository default arguments. Returns go block to synchronize."
-  (go<? (let [user (or user (get-in @stage [:config :user]))
+  (go-try (let [user (or user (get-in @stage [:config :user]))
               nrepo (assoc (repo/new-repository user :branch branch)
                            :public is-public?
                            :description description)
               id (or id (*id-fn*))
-              metas {user {id #{branch}}}
+              identities {user {id #{branch}}}
               ;; id is random uuid, safe swap!
               new-stage (swap! stage #(-> %
                                           (assoc-in [user id] nrepo)
                                           (assoc-in [user id :stage/op] :sub)
                                           (assoc-in [:config :subs user id] #{branch})))]
           (debug "creating new repo for " user "with id" id)
-          (<? (sync! new-stage metas))
-          (cleanup-ops-and-new-values! stage metas)
+          (<? (sync! new-stage identities))
+          (cleanup-ops-and-new-values! stage identities)
           (<? (subscribe-repos! stage (get-in new-stage [:config :subs])))
           id)))
 
@@ -46,13 +45,13 @@
                                                  description ""}}]
   "Forks from one staged user's repo a branch into a new repository for the
 stage user into having repo-id. Returns go block to synchronize."
-  (go<?
+  (go-try
    (when-not (get-in @stage [user repo-id :branches branch])
      (throw (ex-info "Repository or branch does not exist."
                      {:type :repository-does-not-exist
                       :user user :repo repo-id :branch branch})))
    (let [suser (or into-user (get-in @stage [:config :user]))
-         metas {suser {repo-id #{branch}}}
+         identities {suser {repo-id #{branch}}}
          ;; atomic swap! and sync, safe
          new-stage (swap! stage #(if (get-in % [suser repo-id])
                                    (throw (ex-info "Repository already exists, use pull."
@@ -67,8 +66,8 @@ stage user into having repo-id. Returns go block to synchronize."
                                        (assoc-in [suser repo-id :stage/op] :sub)
                                        (assoc-in [:config :subs suser repo-id] #{branch}))))]
      (debug "forking " user repo-id "for" suser)
-     (<? (sync! new-stage metas))
-     (cleanup-ops-and-new-values! stage metas)
+     (<? (sync! new-stage identities))
+     (cleanup-ops-and-new-values! stage identities)
      (<? (subscribe-repos! stage (get-in new-stage [:config :subs]))))))
 
 
@@ -94,7 +93,7 @@ branch2}}}. Returns go block to synchronize. TODO remove branches"
 (defn branch!
   "Create a new branch with tip parent-commit."
   [stage [user repo] branch-name parent-commit]
-  (go<?
+  (go-try
    (let [new-stage (swap! stage (fn [old] (-> old
                                              (update-in [user repo]
                                                         #(repo/branch % branch-name parent-commit))
@@ -115,10 +114,10 @@ branch2}}}. Returns go block to synchronize. TODO remove branches"
 ;; TODO remove value?
 (defrecord Abort [new-value aborted])
 
-(defn abort-transactions [stage [user repo branch]]
+(defn abort-prepared [stage [user repo branch]]
   ;; racing ...
-  (let [a (Abort. nil (get-in @stage [user repo :transactions branch]))]
-    (swap! stage assoc-in [user repo :transactions branch] [])
+  (let [a (Abort. nil (get-in @stage [user repo :prepared branch]))]
+    (swap! stage assoc-in [user repo :prepared branch] [])
     a))
 
 (defn transact
@@ -127,7 +126,7 @@ THIS DOES NOT COMMIT YET, you have to call commit! explicitly afterwards. It can
   ([stage [user repo branch] trans-fn-code params]
    (transact stage [user repo branch] [[trans-fn-code params]]))
   ([stage [user repo branch] transactions]
-   (go<?
+   (go-try
     (when-not (get-in @stage [user repo :state :branches branch])
       (throw (ex-info "Branch does not exist!"
                       {:type :branch-missing
@@ -141,7 +140,7 @@ THIS DOES NOT COMMIT YET, you have to call commit! explicitly afterwards. It can
 
            {{repo-meta repo} user}
            (locking stage
-             (swap! stage update-in [user repo :transactions branch] concat transactions))
+             (swap! stage update-in [user repo :prepared branch] concat transactions))
 
            branch-val :foo #_(<! (branch-value (get-in @peer [:volatile :store])
                                                eval-fn
@@ -156,11 +155,11 @@ THIS DOES NOT COMMIT YET, you have to call commit! explicitly afterwards. It can
       (put! val-ch new-val)))))
 
 (defn transact-binary
-  "Transact a binary blob to reference it later.
+  "Transact a binary blob to reference it later, this only prepares a transaction and does not commit.
   This can support transacting files if the underlying store supports
   this (FileSystemStore)."
   [stage [user repo branch] blob]
-  (go<?
+  (go-try
    #?(:clj ;; HACK efficiently short circuit addition to store
       (when (= (type blob) java.io.File)
         (let [store (-> stage deref :volatile :peer deref :volatile :store)
@@ -174,7 +173,7 @@ THIS DOES NOT COMMIT YET, you have to call commit! explicitly afterwards. It can
 e.g. {user1 {repo1 #{branch1}} user2 {repo1 #{branch1 branch2}}}.
 Returns go block to synchronize."
   [stage repos]
-  (go<?
+  (go-try
    ;; atomic swap and sync, safe
    (<? (sync! (swap! stage (fn [old]
                              (reduce (fn [old [user id branch]]
@@ -196,14 +195,14 @@ Returns go block to synchronize."
                                                          rebase-transactions?]
                                                   :or {allow-induced-conflict? false
                                                        rebase-transactions? false}}]
-  (go<?
+  (go-try
    (let [{{u :user} :config} @stage
          user (or into-user u)]
      (when-not (and (not rebase-transactions?)
-                    (empty? (get-in stage [user repo :transactions branch])))
-       (throw (ex-info "There are pending transactions, which could conflict. Either commit or drop them."
+                    (empty? (get-in stage [user repo :prepared branch])))
+       (throw (ex-info "There are prepared transactions, which could conflict. Either commit or drop them."
                        {:type :transactions-pending-might-conflict
-                        :transactions (get-in repo [user repo :transactions branch])})))
+                        :transactions (get-in stage [user repo :prepared branch])})))
      ;; atomic swap! and sync!, safe
      (<? (sync! (swap! stage (fn [{{{{{remote-heads branch} :branches :as remote-meta} :state} repo}
                                   remote-user :as stage-val}]
@@ -221,10 +220,10 @@ Returns go block to synchronize."
 
 (defn merge-cost
   "Estimates cost for adding a further merge to the repository by taking
-the ratio between merges and normal commits of the causal-order into account."
-  [causal]
-  (let [merges (count (filter (fn [[k v]] (> (count v) 1)) causal))
-        ratio (double (/ merges (count causal)))]
+the ratio between merges and normal commits of the commit-graph into account."
+  [graph]
+  (let [merges (count (filter (fn [[k v]] (> (count v) 1)) graph))
+        ratio (double (/ merges (count graph)))]
     (int (* (- (#?(:clj Math/log :cljs js/Math.log) (- 1 ratio)))
             100000))))
 
@@ -241,9 +240,9 @@ the ratio between merges and normal commits of the causal-order into account."
       :or {wait? true
            correcting-transactions []}}]
   (let [heads (get-in @stage [user repo :state :branches branch])
-        causal (get-in @stage [user repo :state :causal-order])]
-    (go<?
-     (when-not causal
+        graph (get-in @stage [user repo :state :commit-graph])]
+    (go-try
+     (when-not graph
        (throw (ex-info "Repository or branch does not exist."
                        {:type :repo-does-not-exist
                         :user user :repo repo :branch branch})))
@@ -252,9 +251,9 @@ the ratio between merges and normal commits of the causal-order into account."
                        {:type :heads-dont-match-branch
                         :heads heads
                         :supplied-heads heads-order})))
-     (let [metas {user {repo #{branch}}}]
+     (let [identities {user {repo #{branch}}}]
        (when wait?
-         (<! (timeout (rand-int (merge-cost causal)))))
+         (<? (timeout (rand-int (merge-cost graph)))))
        (when-not (= heads (get-in @stage [user repo :state :branches branch]))
          (throw (ex-info "Heads changed, merge aborted."
                          {:type :heads-changed
@@ -268,129 +267,5 @@ the ratio between merges and normal commits of the causal-order into account."
                                                              heads-order
                                                              correcting-transactions))
                                      (assoc-in [user repo :stage/op] :pub))))
-                  metas))
-       (cleanup-ops-and-new-values! stage metas)))))
-
-
-(comment
-  (use 'aprint.core)
-  (require '[replikativ.sync :refer [client-peer]])
-  (require '[konserve.store :refer [new-mem-store]])
-  (require '[konserve.filestore :refer [new-fs-store]])
-  (def peer (client-peer "TEST-PEER" (<!! (new-fs-store "/tmp/gstore")) identity))
-  (def stage (<!! (create-stage! "john" peer eval)))
-
-  (def repo-id (<!! (create-repo! stage "Test repository.")))
-  (<!! (transact-binary stage ["john" repo-id "master"] (clojure.java.io/file "/tmp/foo")))
-  (<!! (commit! stage {"john" {repo-id #{"master"}}}))
-  (<!! (fork! stage ["john3" #uuid "a4c3b82d-5d21-4f83-a97f-54d9d40ec85a" "master"]))
-  (aprint (dissoc @stage :volatile))
-  ;; => repo-id
-  (subscribe-repos! stage {"john" {#uuid "3d48173c-d3c0-49ca-bcdf-caa340be249b" #{"master"}}})
-  (remove-repos! stage {"john" #{42}})
-
-  ["jim" 42 123]        ;; value
-  ["jim" 42 "featureX"] ;; identity
-  (branch! stage ["jim" 42 123] "featureX")
-  (checkout! stage ["jim" 42 "featureX"])
-  (transact stage ["john" #uuid "fdbb6d8c-bf76-4de0-8c53-70396b7dc8ff" "master"] {:b 2} 'clojure.core/merge)
-  (go (doseq [i (range 10)]
-        (<! (commit! stage {"john" {#uuid "36e02e84-a8a5-47e6-9865-e4ac0ba243d6" #{"master"}}}))))
-  (merge! stage ["john" #uuid "9bc896ed-9173-4357-abbe-c7eca1512dc5" "master"])
-  (pull! stage ["john" 42 "master"] ["jim" 42 "master"])
-
-
-  (go (println (<! (realize-value (get-in @stage ["john"  #uuid "fdbb6d8c-bf76-4de0-8c53-70396b7dc8ff"])
-                                  "master"
-                                  (get-in @peer [:volatile :store])
-                                  eval))))
-
-
-  {:invites [["jim" 42 "conversationA63EF"]]}
-
-  (transact server-stage
-            ["shelf@polyc0l0r.net" 68 :#hashtags]
-            #{:#spon}
-            'clojure.set/union)
-
-  (transact stage
-            ["shelf@polyc0l0r.net" 68 :#spon]
-            {:type :post
-             :content "I will be there tomorrow."
-             :ts 0}
-            'clojure.core/merge)
-
-  (transact stage
-            ["jim" 42 "conversationA63EF"]
-            {:type :post
-             :content "I will be there tomorrow."
-             :ts 0} 'clojure.core/merge)
-
-  (commit! stage ["jim" 42 "conversationA63EF"])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  (def stage (atom nil))
-  (go (def store (<! (new-mem-store))))
-  (go (def peer (sync/client-peer "CLIENT" store)))
-  ;; remote server to sync to
-  (require '[replikativ.platform :refer [create-http-kit-handler! start stop]])
-  (go (def remote-peer (sync/server-peer (create-http-kit-handler! "ws://localhost:9090/")
-                                         (<! (new-mem-store)))))
-  (start remote-peer)
-  (stop remote-peer)
-  (-> @remote-peer :volatile :store)
-
-  (go (>! (second (:chans @stage)) {:topic :meta-pub-req
-                                    :user "me@mail.com"
-                                    :repo #uuid "94482d4c-a4ba-4069-b017-b70c9027bb9a"
-                                    :metas {"master" #{}}}))
-
-  (first (-> @peer :volatile :chans))
-
-  (let [pub-ch (chan)]
-    (sub (first (:chans @stage)) :meta-pub pub-ch)
-    (go-loop [p (<! pub-ch)]
-      (when p
-        (println  "META-PUB:" p)
-        (recur (<! pub-ch)))))
-
-
-  (go (println (<! (s/realize-value @stage (-> @peer :volatile :store) eval))))
-  (go (println
-       (let [new-stage (-> (repo/new-repository "me@mail.com"
-                                                {:type "s" :version 1}
-                                                "Testing."
-                                                false
-                                                {:some 43})
-                           (wire-stage peer)
-                           <!
-                           (connect! "ws://localhost:9090/")
-                           <!
-                           sync!
-                           <!)]
-         (println "NEW-STAGE:" new-stage)
-         (reset! stage new-stage)
-         #_(swap! stage (fn [old stage] stage)
-                  (->> (s/transact new-stage
-                                   {:other 43}
-                                   '(fn merger [old params] (merge old params)))
-                       repo/commit
-                       sync!
-                       <!)))))
-
-
-
-  )
+                  identities))
+       (cleanup-ops-and-new-values! stage identities)))))
