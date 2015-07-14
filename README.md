@@ -1,10 +1,27 @@
 # replikativ
 
+[Quote](http://tonsky.me/blog/the-web-after-tomorrow/):
+>These are the things we are interested (for the modern web) in:
+>
+>    Consistent view of the data. What we’re looking at should be coherent at some point-in-time moment. We don’t want patchwork of static data at one place, slightly stale at another and fresh rare pieces all over the place. People percieve page as a whole, all at once. Consistency removes any possibility for contradictions in what people see, consistent app looks sane and builds trust.
+
+>    Always fresh data. All data we see on the client should be relevant right now. Everything up to the tiniest detail. Ideally including all resources and even code that runs the app. If I upload a new userpic, I want it to be reloaded on all the screens where people might be seeing it at the moment. Even if it’s displayed in a one-second-long, self-disposing notification popup.
+>
+>    Instant response. UI should not wait until server confirms user’s actions. Effect of the action should be displayed immediately.
+>
+>    Handle network failures. Networks are not a reliable communication device, yet reliable protocols can be built on top of them. Network failures, lost packets, dropped connections, duplicates should not undermine our consistency guarantees.
+
+>    Offline. Obviously data will not be up-to-date, but at least I should be able to do local modifications, then merge changes when I get back online.
+>
+>    No low-level connection management, retries, deduplication. These are tedious, error-prone details with subtle nuances. App developers should not handle these manually: they will always choose what’s easier or faster to implement, sacrificing user experience. Underlying library should take care of the details.
+
+
+
 `replikativ` is a replication system for convergent replicated data types ([CRDTs](http://hal.inria.fr/docs/00/55/55/88/PDF/techreport.pdf)). It is primarily designed to work as a decentralized database for web applications, but can be used to distribute any state durably between different peers with different runtimes (JVM, js; CLR planned). Instead of programming thin web-clients around a central server/cloud, you operate on your local data like a native application both on client- and (if you wish to) server-side. You can also view it in reverse as a cloud being expanded to all end-points.
 Commit whenever you want and access values whenever you want no matter if the remote peer (server) is *available* or not. You can imagine it as a `git` for data (expressed e.g. in [edn](https://github.com/edn-format/edn)) + automatic eventual consistent synchronization. The motivation is to share data openly and develop applications on shared well-defined data carrying over the immutable value semantics of [Clojure](http://clojure.org/). This allows not only to fork code, but much more importantly to fork the data of applications and extend it in unplanned ways.
 The tradeoff is that your application maybe has to support after-the-fact conflict resolution, which can be achieved fairly easily with strict relational data-models like [datascript](https://github.com/tonsky/datascript), but in some cases users will have to decide conflicts.
 
-A prototype application, with an example deployment, can be found here: [topiq](https://github.com/ghubber/topiq).
+A prototype application, with an example deployment, can be found here: [topiq](https://github.com/kordano/topiq).
 
 ## Usage
 
@@ -21,7 +38,7 @@ The replication protocol partitions the global state space into user specific pl
 
 We make heavy use of [core.async](https://github.com/clojure/core.async) to model peers platform- and network-agnostic just as peers having a pair of messaging channels for `edn` messages. We build on platform-neutral durable storage through [konserve](https://github.com/ghubber/konserve). At the core is a `pub-sub` scheme between peers, but most functionality is factored into `middlewares` filtering and tweaking the in/out channel pair of each peers pub-sub core. This allows decoupled extension of the network protocol.
 
-For detailed documentation of the repository CRDT look at the [introduction](http://ghubber.github.io/replikativ/). Or to understand the [pub-sub message protocol for synching](http://ghubber.github.io/replikativ/synching.html).
+For detailed documentation of the repository CRDT look at the [introduction](http://whilo.github.io/replikativ/). Or to understand the [pub-sub message protocol for replication](http://whilo.github.io/replikativ/replication.html). You can also find test cases for the [stage API](http://whilo.github.io/replikativ/stage.html) and the [pull hooks](http://whilo.github.io/replikativ/hooks.html) there.
 
 # Repository CRDT
 
