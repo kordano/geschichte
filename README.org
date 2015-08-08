@@ -1,8 +1,5 @@
 #+TITLE: replikativ
 #+CATEGORY: replikativ
-#+TAGS: bug feature review theory refactor
-#+TODO: TODO(t) STARTED(s!) DONE(d!) 
-#+TODO: CANCELED(c@)
 #+STARTUP: overview 
 #+STARTUP: hidestars
 #+PROPERTY: Assigned_to_ALL kordano whilo
@@ -79,6 +76,29 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
   See also [[http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext][lca in haskell (including repository monad)]]
 
 **** TODOs
+***** TODO describe example application                             :writing:
+     DEADLINE: <2015-08-09 Sun>
+     :PROPERTIES:
+     :Created: [2015-08-08 Sat 22:30]
+     :Assigned_to: kordano
+     :END:
+***** TODO create ops and state visualization                       :writing:
+     DEADLINE: <2015-08-09 Sun>
+     :PROPERTIES:
+     :Created: [2015-08-08 Sat 22:29]
+     :Assigned_to: kordano
+     :END:
+***** TODO Paper Commitment                                      :deployment:
+     DEADLINE: <2015-08-20 Thu>
+     :PROPERTIES:
+     :Created: [2015-08-08 Sat 22:28]
+     :Assigned_to: kordano
+     :END:
+***** APPT Weekly Discussion 					    :meeting:
+     <2015-08-04 Di 15:00-18:00 +1w>
+     :PROPERTIES:
+     :Created: [2015-07-30 Do 14:10]
+     :END:
 ***** TODO Handle tag-table for messaging of records (transit?).   :feature:
 ***** TODO Reactivate cljs port :bug:
 ***** TODO Rename all messaging: remove ambiguous "meta" terminology :refactor:
@@ -92,17 +112,15 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
 - :op (in publication) -> :downstream (because the operation is actually always a downstream operation)
 - :transactions -> :prepared (transaction is confusing and might be misunderstood as already applied, while :prepared makes clear that the operation is not yet applied.)
 
-***** TODO create crdt bibliography 				     :theory:
-       DEADLINE: <2015-07-05 So>
-    :PROPERTIES:
-    :Assigned_to: whilo
-    :END:
 ***** STARTED fix geschichte example 				:bug:
      - State "STARTED"    from "TODO"       [2015-06-17 Mi 17:50]
     :PROPERTIES:
     :Assigned_to: kordano
     :END:
-***** TODO go macros 					    :feature:
+***** STARTED go macros						    :feature:
+      :LOGBOOK:  
+      - State "STARTED"    from "TODO"       [2015-08-04 Di 20:52]
+      :END:      
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
@@ -112,12 +130,6 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
     :PROPERTIES:
     :Assigned_to: whilo
     :END:
-***** DONE Define CRDT Algebra for synching and repo. Use downstream ops of INRIA techreport [DONE] :feature:
-***** DONE Allow dual op-based vs. state-based representation of a CRDT for constant time synching [DONE] :feature:
-***** DONE Give message exchanges unique id to track pub-sub exchanges without network topology. [DONE] :feature:
-***** DONE Visualize repo state. [DONE] :feature:
-***** DONE Refactor core replication to break apart from repository CRDT [DONE] :refactor:
-
 **** License
 
 Copyright © 2013-2015 Christian Weilbach & Konrad Kühne
