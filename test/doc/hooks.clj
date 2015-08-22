@@ -4,6 +4,7 @@
             [replikativ.protocols :refer [-downstream]]
             [replikativ.crdt.materialize :refer [pub->crdt]]
             [replikativ.platform :refer [create-http-kit-handler! start stop]]
+            [replikativ.platform-log :refer [warn]]
             [replikativ.stage :refer [create-stage! connect! subscribe-repos!]]
             [replikativ.crdt.repo.stage :refer [create-repo!] :as s]
             [replikativ.crdt.repo.repo :as repo]
@@ -19,7 +20,7 @@
             [midje.sweet :refer :all]
             [clojure.pprint :refer [pprint]]
             [clojure.core.async :as async
-             :refer [>! >!! timeout chan alt! put! pub sub unsub close!]])
+             :refer [>! >!! timeout chan alt! put! pub sub unsub close! go-loop]])
   (:import [replikativ.crdt Repository]))
 
 [[:chapter {:tag "hooks" :title "Pull hook middleware of replikativ"}]]
@@ -61,30 +62,30 @@
  (def store-b
    (<?? (new-mem-store (atom @(:state store-a)))))
 
+ (def err-ch (chan))
 
- (def peer-a (server-peer (create-http-kit-handler! "ws://127.0.0.1:9090")
-                          store-a
+ (go-loop [e (<? err-ch)]
+   (when e
+     (warn "ERROR occured: " e)
+     (recur (<? err-ch))))
+
+
+ (def peer-a (server-peer (create-http-kit-handler! "ws://127.0.0.1:9090") "PEER A"
+                          store-a err-ch
                           ;; include hooking middleware in peer-a
                           (comp (partial hook hooks store-a)
-                                (partial fetch store-a)
+                                (partial fetch store-a err-ch)
                                 ensure-hash)))
 
- (def peer-b (server-peer (create-http-kit-handler! "ws://127.0.0.1:9091")
-                          store-b
-                          (partial fetch store-b)))
-
- (go-loop-try []
-              (println "ERROR peer-a: " (<? (get-in @peer-a [:volatile :error-ch])))
-              (recur))
- (go-loop-try []
-              (println "ERROR peer-b: " (<? (get-in @peer-b [:volatile :error-ch])))
-              (recur))
+ (def peer-b (server-peer (create-http-kit-handler! "ws://127.0.0.1:9091") "PEER B"
+                          store-b err-ch
+                          (partial fetch store-b err-ch)))
 
 
  (start peer-a)
  (start peer-b)
 
- (def stage-a (<?? (create-stage! "mail:a@mail.com" peer-a eval)))
+ (def stage-a (<?? (create-stage! "mail:a@mail.com" peer-a err-ch eval)))
 
 
  (<?? (subscribe-repos! stage-a {"mail:b@mail.com" {#uuid "790f85e2-b48a-47be-b2df-6ad9ccbc73d6"
@@ -102,7 +103,7 @@
 
  (<?? (connect! stage-a "ws://127.0.0.1:9091"))
 
- (def stage-b (<?? (create-stage! "mail:b@mail.com" peer-b eval)))
+ (def stage-b (<?? (create-stage! "mail:b@mail.com" peer-b err-ch eval)))
 
  (<?? (subscribe-repos! stage-b {"mail:b@mail.com" {#uuid "790f85e2-b48a-47be-b2df-6ad9ccbc73d6"
                                                     #{"master"}}

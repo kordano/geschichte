@@ -47,6 +47,7 @@ This the update of the stage is not executed synchronously. Returns go
             (sub p :fetch/edn fch)
             (go-loop-try> ferr-ch [to-fetch (:ids (<? fch))]
                           (when to-fetch
+                            (debug "fetching edn from stage" to-fetch)
                             (>! out {:type :fetch/edn-ack
                                      :values (select-keys new-values to-fetch)
                                      :id sync-id
@@ -57,6 +58,7 @@ This the update of the stage is not executed synchronously. Returns go
             (go-loop-try> ferr-ch []
                           (let [to-fetch (:blob-id (<? bfch))]
                             (when to-fetch
+                              (debug "fetching blob from stage" to-fetch)
                               (>! out {:type :fetch/binary-ack
                                        :value (get new-values to-fetch)
                                        :blob-id sync-id
@@ -123,25 +125,19 @@ synchronize."
 (defn create-stage!
   "Create a stage for user, given peer and a safe evaluation function
 for the transaction functions.  Returns go block to synchronize."
-  [user peer eval-fn]
+  [user peer err-ch eval-fn]
   (go-try (let [in (chan)
                 out (chan)
                 p (pub in :type)
                 pub-ch (chan)
-                val-ch (chan (async/sliding-buffer 1))
-                val-atom (atom {})
-                stage-id (str "STAGE-" (uuid))
+                stage-id (str "STAGE-" user (subs (str (uuid)) 0 4))
                 {:keys [store]} (:volatile @peer)
-                err-ch (chan (async/sliding-buffer 10))
                 stage (atom {:config {:id stage-id
                                       :user user}
                              :volatile {:chans [p out]
                                         :peer peer
                                         :eval-fn eval-fn
-                                        :err-ch err-ch
-                                        :val-ch val-ch
-                                        :val-atom val-atom
-                                        :val-mult (async/mult val-ch)}})]
+                                        :err-ch err-ch}})]
             (<? (-assoc-in store [store-blob-trans-id] store-blob-trans-value))
             (<? (wire peer (block-detector stage-id [out in])))
             (sub p :pub/downstream pub-ch)

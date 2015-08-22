@@ -10,7 +10,7 @@
             [replikativ.crdt :refer [map->Repository]]
             [replikativ.crdt.utils :refer [extract-crdts]]
             [replikativ.crdt.repo.meta :refer [consistent-graph? lowest-common-ancestors
-                                               merge-ancestors isolate-branch remove-ancestors]]))
+                                               isolate-branch remove-ancestors]]))
 
 
 (defn new-repository
@@ -61,9 +61,9 @@
       :or {allow-empty-txs? false}}]
   ;; TODO either remove or check whole history
   #_(when-not (consistent-graph? (:commit-graph state))
-    (throw (ex-info "Graph order does not contain commits of all referenced parents."
-                    {:type :inconsistent-commit-graph
-                     :state state})))
+      (throw (ex-info "Graph order does not contain commits of all referenced parents."
+                      {:type :inconsistent-commit-graph
+                       :state state})))
   (when (and (not allow-empty-txs?) (empty? prepared))
     (throw (ex-info "No transactions to commit."
                     {:type :no-transactions
@@ -92,16 +92,20 @@
         new-values (clojure.core/merge
                     {id commit-value}
                     (zipmap (apply concat trans-ids)
-                            (apply concat btrans)))]
+                            (apply concat btrans)))
+        new-heads (get-in new-state [:branches branch])
+        #_(conj ;; does not work to trigger LCA (why?)
+           #uuid "3004b2bd-3dd9-5524-a09c-2da166ffad6a" ;; root node
+           )]
     (debug "committing to " branch ": " id commit-value)
     (-> repo
         (assoc
-            :state new-state
-            :downstream {:crdt :repo
-                         :op {:method :commit
-                              :version 1
-                              :commit-graph {id parents}
-                              :branches {branch (get-in new-state [:branches branch])}}})
+         :state new-state
+         :downstream {:crdt :repo
+                      :op {:method :commit
+                           :version 1
+                           :commit-graph {id parents}
+                           :branches {branch new-heads}}})
         (assoc-in [:prepared branch] [])
         (update-in [:new-values branch] clojure.core/merge new-values))))
 
@@ -162,7 +166,7 @@
                       :remote-tip remote-tip})))
    (let [{{branch-heads branch} :branches
           graph :commit-graph} state
-          {:keys [cut returnpaths-a returnpaths-b]}
+          {:keys [lcas visited-a visited-b]}
           (lowest-common-ancestors (:commit-graph state) branch-heads
                                    (:commit-graph remote-state) #{remote-tip})
           remote-graph (isolate-branch (:commit-graph remote-state) #{remote-tip} {})
@@ -174,14 +178,14 @@
                                                                        #{remote-tip})))
           new-graph (:commit-graph new-state)]
      (when (and (not allow-induced-conflict?)
-                (not (set/superset? cut branch-heads)))
+                (not (set/superset? lcas branch-heads)))
        (throw (ex-info "Remote meta is not pullable (a superset). "
                        {:type :not-superset
                         :state state
                         :branch branch
                         :remote-state remote-state
                         :remote-tip remote-tip
-                        :cut cut})))
+                        :lcas lcas})))
      (when (and (not allow-induced-conflict?)
                 (multiple-branch-heads? new-state branch))
        (throw (ex-info "Cannot pull without inducing conflict, use merge instead."
@@ -189,13 +193,13 @@
                         :state new-state
                         :branch branch
                         :heads (get-in new-state [:branches branch])})))
-     (debug "pulling: from cut " cut " returnpaths: " returnpaths-b " new meta: " new-state)
+     (debug "pulling: from cut " lcas " visited: " visited-b " new meta: " new-state)
      (assoc repo
        :state (clojure.core/merge state new-state)
        :downstream {:crdt :repo
                     :op {:method :pull
                          :version 1
-                         :commit-graph (select-keys (:commit-graph new-state) (keys returnpaths-b))
+                         :commit-graph (select-keys (:commit-graph new-state) visited-b)
                          :branches {branch #{remote-tip}}}}))))
 
 
@@ -232,7 +236,8 @@ supplied. Otherwise see merge-heads how to get and manipulate them."
                                        source-heads
                                        (:commit-graph remote-state)
                                        remote-heads)
-         new-graph (merge-ancestors (:commit-graph state) (:cut lcas) (:returnpaths-b lcas))]
+         new-graph (clojure.core/merge (:commit-graph state) (select-keys (:commit-graph remote-state)
+                                                                          (:visited-b lcas)))]
      (debug "merging: into " author (:id state) lcas)
      (assoc-in (raw-commit (-> repo
                                (assoc-in [:state :commit-graph] new-graph)
