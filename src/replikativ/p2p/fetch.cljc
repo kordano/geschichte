@@ -4,13 +4,14 @@
             [replikativ.protocols :refer [-missing-commits -downstream]]
             [replikativ.platform-log :refer [debug info warn error]]
             [replikativ.crdt.materialize :refer [pub->crdt]]
-            [full.async :refer [<? <<? go-try go-for go-loop-try go-loop-try>]]
+            #?(:clj [full.async :refer [<? <<? go-try go-for go-loop-try go-loop-try>]]
+               :cljs [full.cljs.async :refer [<? <<? go-try go-for go-loop-try go-loop-try>]])
             [konserve.protocols :refer [-assoc-in -exists? -get-in -update-in
                                         -bget -bassoc]]
             [clojure.set :as set]
             #?(:clj [clojure.java.io :as io])
             #?(:clj [clojure.core.async :as async
-                      :refer [>! timeout chan alt! go put! pub sub unsub close!]]
+                      :refer [>! timeout chan put! pub sub unsub close!]]
                :cljs [cljs.core.async :as async
                       :refer [>! timeout chan put! pub sub unsub close!]]))
   #?(:clj (:import [java.io ByteArrayOutputStream])))

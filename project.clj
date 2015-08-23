@@ -11,6 +11,7 @@
                  [http-kit "2.1.19"]
                  [http.async.client "0.6.0"]
                  [es.topiq/full.async "0.2.8-beta1"]
+                 [kordano/full.cljs.async "0.1.3-alpha"]
                  [es.topiq/hasch "0.3.0-beta3"]
                  [net.polyc0l0r/konserve "0.2.3"]
                  [com.taoensso/timbre "4.0.2"]]

@@ -3,17 +3,18 @@
   to more CRDTs synchronously to the update propagation."
   (:require #?(:clj
                 [clojure.core.async :as async
-                 :refer [>! timeout chan alt! go put! go-loop pub sub unsub close! chan]]
+                 :refer [>! timeout chan put! go-loop pub sub unsub close! chan]]
                :cljs
                 [cljs.core.async :as async :refer [>! timeout chan put! pub sub unsub close!]])
 
             [replikativ.crdt.materialize :refer [pub->crdt]]
             [replikativ.platform-log :refer [debug info warn error]]
             [replikativ.protocols :refer [PHasIdentities PPullOp -identities -downstream -pull]]
-            [full.async :refer [go-for <? go-try] #?(:cljs :include-macros)]
+            #?(:clj [full.async :refer [go-for <? go-try]])
             [konserve.protocols :refer [IEDNAsyncKeyValueStore -assoc-in -get-in -update-in]]
             [konserve.store :refer [new-mem-store]])
-  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)])))
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]
+                            [full.cljs.async :refer [go-for <? go-try]])))
 
 
 ;; requirement for pull-hooks:

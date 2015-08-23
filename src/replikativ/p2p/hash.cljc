@@ -5,7 +5,8 @@
             [replikativ.crdt.materialize :refer [pub->crdt]]
             [replikativ.protocols :refer [-commit-value]]
             [clojure.set :as set]
-            [full.async :refer [go-try go-loop-try <?]]
+            #?(:clj [full.async :refer [go-try go-loop-try <?]]
+               :cljs [full.cljs.async :refer [go-try go-loop-try <?]])
             #?(:clj [clojure.core.async :as async
                       :refer [>! timeout chan put! pub sub unsub close!]]
                :cljs [cljs.core.async :as async
