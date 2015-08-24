@@ -7,7 +7,8 @@
               [replikativ.crdt.repo.impl :as impl]
               [replikativ.crdt.repo.meta :as meta]
               [replikativ.platform-log :refer [debug info warn]]
-              [full.async :refer [go-try <?]]
+              #?(:clj [full.async :refer [go-try <?]]
+                 :cljs [full.cljs.async :refer [go-try <?]])
               [hasch.core :refer [uuid]]
               [clojure.set :as set]
               #?(:clj [clojure.core.async :as async

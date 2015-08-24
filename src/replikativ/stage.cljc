@@ -9,7 +9,8 @@
               [replikativ.crdt.materialize :refer [pub->crdt]]
               [replikativ.p2p.block-detector :refer [block-detector]]
               [replikativ.platform-log :refer [debug info warn]]
-              [full.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]]
+              #?(:clj [full.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]]
+                 :cljs [full.cljs.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]])
               [hasch.core :refer [uuid]]
               [clojure.set :as set]
               #?(:clj [clojure.core.async :as async

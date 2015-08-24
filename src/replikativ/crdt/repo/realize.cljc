@@ -4,7 +4,8 @@
             [replikativ.crdt.repo.repo :as repo]
             [replikativ.crdt.repo.meta :as meta]
             [replikativ.platform-log :refer [debug info warn]]
-            [full.async :refer [<? go-try]]
+            #?(:clj [full.async :refer [<? go-try]]
+               :cljs [full.cljs.async :refer [<? go-try]])
             #?(:clj [clojure.core.async :as async
                       :refer [<! <!! >! timeout chan alt! go put! filter< map< go-loop sub unsub pub close!]]
                :cljs [cljs.core.async :as async

@@ -76,14 +76,24 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
   See also [[http://slideshare.net/ekmett/skewbinary-online-lowest-common-ancestor-search#btnNext][lca in haskell (including repository monad)]]
 
 **** TODOs
-***** TODO describe example application                             :writing:
-     DEADLINE: <2015-08-09 Sun>
+***** DONE describe example application                             :writing:
+      CLOSED: [2015-08-12 Wed 15:49] DEADLINE: <2015-08-12 Wed>
+     :LOGBOOK:  
+     - State "DONE"       from "STARTED"    [2015-08-12 Wed 15:49]
+     - State "STARTED"    from "TODO"       [2015-08-09 Sun 17:54]
+     CLOCK: [2015-08-09 Sun 17:24]--[2015-08-09 Sun 17:54] =>  0:30
+     :END:      
      :PROPERTIES:
      :Created: [2015-08-08 Sat 22:30]
      :Assigned_to: kordano
      :END:
-***** TODO create ops and state visualization                       :writing:
-     DEADLINE: <2015-08-09 Sun>
+***** DONE create ops and state visualization                       :writing:
+      CLOSED: [2015-08-11 Tue 16:01] DEADLINE: <2015-08-12 Wed>
+     :LOGBOOK:  
+     - State "DONE"       from "STARTED"    [2015-08-11 Tue 16:01]
+     - State "STARTED"    from "TODO"       [2015-08-09 Sun 17:54]
+     CLOCK: [2015-08-09 Sun 15:11]--[2015-08-09 Sun 17:04] =>  1:53
+     :END:      
      :PROPERTIES:
      :Created: [2015-08-08 Sat 22:29]
      :Assigned_to: kordano

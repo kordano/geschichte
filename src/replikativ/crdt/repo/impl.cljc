@@ -7,7 +7,8 @@
                                           PExternalValues -missing-commits -commit-value
                                           PPullOp -pull]]
             [replikativ.platform-log :refer [debug info error]]
-            [full.async :refer [go-try go-loop-try go-for <?]]
+            #?(:clj [full.async :refer [go-try go-loop-try go-for <?]]
+               :cljs [full.cljs.async :refer [go-try go-loop-try go-for <?]])
             [replikativ.crdt.repo.repo :as repo]
             [replikativ.crdt.repo.meta :refer [downstream isolate-branch]]
             [konserve.protocols :refer [-exists? -assoc-in -get-in -bassoc -update-in]]
