@@ -1,5 +1,6 @@
 (ns replikativ.crdt.repo.impl
   "Implementation of the CRDT replication protocol."
+  #?(:cljs (:require-macros [full.cljs.async :refer [<? go-try go-loop-try go-for]]))
   (:require [clojure.set :as set]
             [replikativ.environ :refer [*id-fn* *date-fn* store-blob-trans-id]]
             [replikativ.protocols :refer [PHasIdentities -identities -select-identities
@@ -7,8 +8,7 @@
                                           PExternalValues -missing-commits -commit-value
                                           PPullOp -pull]]
             [replikativ.platform-log :refer [debug info error]]
-            #?(:clj [full.async :refer [go-try go-loop-try go-for <?]]
-               :cljs [full.cljs.async :refer [go-try go-loop-try go-for <?]])
+            #?(:clj [full.async :refer [go-try go-loop-try go-for <?]])
             [replikativ.crdt.repo.repo :as repo]
             [replikativ.crdt.repo.meta :refer [downstream isolate-branch]]
             [konserve.protocols :refer [-exists? -assoc-in -get-in -bassoc -update-in]]

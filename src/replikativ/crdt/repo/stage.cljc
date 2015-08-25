@@ -7,14 +7,14 @@
               [replikativ.crdt.repo.impl :as impl]
               [replikativ.crdt.repo.meta :as meta]
               [replikativ.platform-log :refer [debug info warn]]
-              #?(:clj [full.async :refer [go-try <?]]
-                 :cljs [full.cljs.async :refer [go-try <?]])
+              #?(:clj [full.async :refer [go-try <?]])
               [hasch.core :refer [uuid]]
               [clojure.set :as set]
               #?(:clj [clojure.core.async :as async
                        :refer [>! timeout chan put! sub unsub pub close!]]
                  :cljs [cljs.core.async :as async
-                        :refer [>! timeout chan put! sub unsub pub close!]])))
+                        :refer [>! timeout chan put! sub unsub pub close!]]))
+    #?(:cljs (:require-macros [full.cljs.async :refer [go-try <?]])))
 
 
 (defn create-repo! [stage & {:keys [user is-public? branch id description]

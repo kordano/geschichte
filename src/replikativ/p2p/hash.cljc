@@ -5,12 +5,12 @@
             [replikativ.crdt.materialize :refer [pub->crdt]]
             [replikativ.protocols :refer [-commit-value]]
             [clojure.set :as set]
-            #?(:clj [full.async :refer [go-try go-loop-try <?]]
-               :cljs [full.cljs.async :refer [go-try go-loop-try <?]])
+            #?(:clj [full.async :refer [go-try go-loop-try <?]])
             #?(:clj [clojure.core.async :as async
                       :refer [>! timeout chan put! pub sub unsub close!]]
                :cljs [cljs.core.async :as async
-                             :refer [>! timeout chan put! pub sub unsub close!]])))
+                      :refer [>! timeout chan put! pub sub unsub close!]]))
+  #?(:cljs (:require-macros [full.cljs.async :refer [go-try go-loop-try <?]])))
 
 (defn- check-hash [fetched-ch new-in]
   (go-loop-try [{:keys [values peer] :as f} (<? fetched-ch)]

@@ -4,8 +4,7 @@
             [replikativ.protocols :refer [-missing-commits -downstream]]
             [replikativ.platform-log :refer [debug info warn error]]
             [replikativ.crdt.materialize :refer [pub->crdt]]
-            #?(:clj [full.async :refer [<? <<? go-try go-for go-loop-try go-loop-try>]]
-               :cljs [full.cljs.async :refer [<? <<? go-try go-for go-loop-try go-loop-try>]])
+            #?(:clj [full.async :refer [<? <<? go-try go-for go-loop-try go-loop-try>]])
             [konserve.protocols :refer [-assoc-in -exists? -get-in -update-in
                                         -bget -bassoc]]
             [clojure.set :as set]
@@ -14,7 +13,8 @@
                       :refer [>! timeout chan put! pub sub unsub close!]]
                :cljs [cljs.core.async :as async
                       :refer [>! timeout chan put! pub sub unsub close!]]))
-  #?(:clj (:import [java.io ByteArrayOutputStream])))
+  #?(:clj (:import [java.io ByteArrayOutputStream]))
+  #?(:cljs (:require-macros [full.cljs.async :refer [<? <<? go-try go-for go-loop-try go-loop-try>]])))
 
 
 
@@ -104,7 +104,7 @@
   [store err-ch p pub-ch [in out]]
   (let [fetched-ch (chan)
         binary-fetched-ch (chan)
-        all-true? (fn [x] (if (seq? x) (reduce #(and %1 %2)) x))]
+        all-true? (fn [x] (if (seq? x) (reduce #(and %1 %2) x) x))]
     (sub p :fetch/edn-ack fetched-ch)
     (sub p :fetch/binary-ack binary-fetched-ch)
     ;; TODO err-channel

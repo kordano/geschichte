@@ -4,8 +4,8 @@
    Metadata repository-format for automatic server-side
    synching (p2p-web). Have a look at the midje-doc documentation for
    more information."
-  (:require [clojure.set :as set])
-  (:require [replikativ.environ :refer [*date-fn*]]))
+  (:require [clojure.set :as set]
+            [replikativ.environ :refer [*date-fn*]]))
 
 
 (defn consistent-graph? [graph]

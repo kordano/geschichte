@@ -13,7 +13,7 @@
             #?(:clj [full.async :refer [go-for <? go-try]])
             [konserve.protocols :refer [IEDNAsyncKeyValueStore -assoc-in -get-in -update-in]]
             [konserve.store :refer [new-mem-store]])
-  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer [go go-loop alt!]]
                             [full.cljs.async :refer [go-for <? go-try]])))
 
 

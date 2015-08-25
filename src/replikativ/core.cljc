@@ -7,14 +7,14 @@
             [replikativ.platform-log :refer [debug info warn error]]
             [clojure.set :as set]
             [replikativ.platform-data :refer [diff]]
-            #?(:clj [full.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]]
-               :cljs [full.cljs.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]])
+            #?(:clj [full.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]])
             [replikativ.platform :refer [client-connect!] :include-macros true]
             #?(:clj [clojure.core.async :as async
                      :refer [>! <!! timeout chan alt! go put! go-loop pub sub unsub close!]]
                :cljs [cljs.core.async :as async
                      :refer [>! timeout chan put! pub sub unsub close!]]))
-  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)])))
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]
+                            [full.cljs.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]])))
 
 
 (declare wire)

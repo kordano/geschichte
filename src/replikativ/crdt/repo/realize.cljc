@@ -4,12 +4,12 @@
             [replikativ.crdt.repo.repo :as repo]
             [replikativ.crdt.repo.meta :as meta]
             [replikativ.platform-log :refer [debug info warn]]
-            #?(:clj [full.async :refer [<? go-try]]
-               :cljs [full.cljs.async :refer [<? go-try]])
+            #?(:clj [full.async :refer [<? go-try]])
             #?(:clj [clojure.core.async :as async
                       :refer [<! <!! >! timeout chan alt! go put! filter< map< go-loop sub unsub pub close!]]
                :cljs [cljs.core.async :as async
-                      :refer [<! >! timeout chan put! filter< map< sub unsub pub close!]])))
+                      :refer [<! >! timeout chan put! filter< map< sub unsub pub close!]]))
+  #?(:cljs (:require-macros [full.cljs.async :refer [<? go-try]])))
 
 
 (defn commit-history
@@ -61,7 +61,7 @@ synchronize."
     (if (= trans-fn store-blob-trans-value)
       (store-blob-trans val params)
       ((eval-fn trans-fn) val params))
-    (catch Exception e
+    (catch #?(:clj Exception :cljs js/Error) e
       (throw (ex-info "Cannot transact."
                       {:trans-fn trans-fn
                        :params params
