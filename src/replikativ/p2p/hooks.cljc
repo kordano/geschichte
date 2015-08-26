@@ -3,7 +3,7 @@
   to more CRDTs synchronously to the update propagation."
   (:require #?(:clj
                 [clojure.core.async :as async
-                 :refer [>! timeout chan put! go-loop pub sub unsub close! chan]]
+                 :refer [>! timeout chan put! go-loop pub sub unsub close! chan go]]
                :cljs
                 [cljs.core.async :as async :refer [>! timeout chan put! pub sub unsub close!]])
 
