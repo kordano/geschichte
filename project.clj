@@ -17,7 +17,7 @@
                  [es.topiq/full.async "0.2.8-beta1"]
                  [kordano/full.cljs.async "0.1.3-alpha"]
                  [es.topiq/hasch "0.3.0-beta3"]
-                 [net.polyc0l0r/konserve "0.2.3"]
+                 [net.polyc0l0r/konserve "0.2.4-SNAPSHOT"]
                  [weasel "0.7.0" :exclusions [org.clojure/clojurescript]]
                  [com.cemerick/piggieback "0.2.1"]
                  [com.taoensso/timbre "4.0.2"]]
@@ -43,7 +43,8 @@
      :compiler
      {:output-to "test/dev/out/main.js"
       :output-dir "test/dev/out"
-      :optimizations :non}}
+      :optimizations :none
+      :pretty-print true}}
     {:id "dev"
      :source-paths ["src"]
      :compiler

@@ -268,7 +268,7 @@
                    :url url
                    :id id
                    :peer (:peer c)}))
-        (catch #?(:clj Throwable :cljs js/Error)  e
+        (catch #?(:clj Throwable :cljs js/Error) e
                (>! out {:type :connect/peer-ack
                         :url url
                         :id id
