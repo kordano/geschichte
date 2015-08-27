@@ -34,16 +34,16 @@
 
   :codox {:sources ["src"]}
 
-  :clean-targets ^{:protect false}["target" "test/dev/main.js"]
+  :clean-targets ^{:protect false}["target" "test/dev/out"]
   
   :cljsbuild
   {:builds
    [{:id "brepl"
-     :source-paths ["src" "test/dev"]
+     :source-paths ["test/dev"]
      :compiler
-     {:output-to "test/dev/main.js"
-      :optimizations :simple
-      :pretty-print true}}
+     {:output-to "test/dev/out/main.js"
+      :output-dir "test/dev/out"
+      :optimizations :non}}
     {:id "dev"
      :source-paths ["src"]
      :compiler

@@ -13,11 +13,12 @@
                      :refer [>! <!! timeout chan alt! go put! go-loop pub sub unsub close!]]
                :cljs [cljs.core.async :as async
                      :refer [>! timeout chan put! pub sub unsub close!]]))
-  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go go-loop alt!)]
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer [go go-loop alt!]]
                             [full.cljs.async :refer [<? <<? go-for go-try go-loop-try go-loop-try> alt?]])))
 
 
 (declare wire)
+
 (defn client-peer
   "Creates a client-side peer only."
   [name store err-ch middleware]
@@ -31,7 +32,6 @@
                       :store store}
            :name name
            :subscriptions {}})))
-
 
 (defn server-peer
   "Constructs a listening peer. You need to integrate
@@ -83,7 +83,8 @@
                        (let [crdt (<? (pub->crdt store [user repo-id] (:crdt pub)))
                              identities (get-in sbs [user repo-id])]
                          [[user repo-id]
-                          (if (extends? PHasIdentities (class crdt))
+                          (if #?(:clj (extends? PHasIdentities (class crdt))
+                                 :cljs (.. crdt -prototype isPrototypeOf PHasIdentities))
                             (update-in pub [:op] #(-select-identities crdt identities %))
                             pub)]))
                (async/into [])
@@ -267,7 +268,7 @@
                    :url url
                    :id id
                    :peer (:peer c)}))
-        (catch #?(:clj Throwable) e
+        (catch #?(:clj Throwable :cljs js/Error)  e
                (>! out {:type :connect/peer-ack
                         :url url
                         :id id

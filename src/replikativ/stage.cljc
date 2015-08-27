@@ -183,7 +183,8 @@ subscribed on the stage afterwards. Returns go block to synchronize."
                                            [repo-id identities] rs]
                                        [[user repo-id] identities])
                                      (filter #(when-let [crdt (get-in @stage (first %))]
-                                                (if (extends? PHasIdentities (class crdt))
+                                                (if #?(:clj (extends? PHasIdentities (class crdt))
+                                                       :cljs (.. crdt -prototype isPrototypeOf PHasIdentities))
                                                   (let [loaded (-identities crdt)]
                                                     (set/difference (second %) loaded)))))))]
             (loop [na (not-avail)]
