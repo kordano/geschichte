@@ -19,6 +19,8 @@
                  [es.topiq/hasch "0.3.0-beta3"]
                  [net.polyc0l0r/konserve "0.2.4-SNAPSHOT"]
                  [com.cemerick/piggieback "0.2.1"]
+                 [weasel "0.7.0" :exclusions [org.clojure/clojurescript]]
+                 [com.cemerick/piggieback "0.2.1"]
                  [com.taoensso/timbre "4.0.2"]]
 
   :profiles {:dev {:dependencies [[midje "1.6.3"]
@@ -31,7 +33,7 @@
 
   :codox {:sources ["src"]}
 
-  :clean-targets ^{:protect false}["target" "test/dev/client/out" "resources/public/js"]
+  :clean-targets ^{:protect false}["target" "out" "test/dev/client/out" "resources/public/js"]
   
   :cljsbuild
   {:builds
