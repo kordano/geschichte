@@ -18,7 +18,6 @@
                  [kordano/full.cljs.async "0.1.3-alpha"]
                  [es.topiq/hasch "0.3.0-beta3"]
                  [net.polyc0l0r/konserve "0.2.4-SNAPSHOT"]
-                 [weasel "0.7.0" :exclusions [org.clojure/clojurescript]]
                  [com.cemerick/piggieback "0.2.1"]
                  [com.taoensso/timbre "4.0.2"]]
 
@@ -26,23 +25,31 @@
                                   [com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/tools.nrepl "0.2.10"]]}}
   
-  :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-
-  :plugins [[lein-cljsbuild "1.0.6"]
-                                        ;[com.cemerick/austin "0.1.6"]
+  :plugins [[lein-cljsbuild "1.1.0"]
+            [lein-figwheel "0.3.7"]
             [codox "0.8.13"]]
 
   :codox {:sources ["src"]}
 
-  :clean-targets ^{:protect false}["target" "test/dev/out"]
+  :clean-targets ^{:protect false}["target" "test/dev/client/out" "resources/public/js"]
   
   :cljsbuild
   {:builds
    [{:id "brepl"
-     :source-paths ["test/dev"]
+     :source-paths ["test/dev/client"]
      :compiler
-     {:output-to "test/dev/out/main.js"
-      :output-dir "test/dev/out"
+     {:output-to "test/dev/client/out/main.js"
+      :output-dir "test/dev/client/out"
+      :optimizations :none
+      :pretty-print true}}
+    {:id "bdev"
+     :source-paths ["test/dev/client"]
+     :figwheel true
+     :compiler
+     {:main dev.client.core
+      :asset-path "js/out"
+      :output-to "resources/public/js/client.js"
+      :output-dir "resources/public/js/out"
       :optimizations :none
       :pretty-print true}}
     {:id "dev"

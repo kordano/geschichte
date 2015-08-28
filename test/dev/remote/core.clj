@@ -1,4 +1,4 @@
-(ns dev.remote
+(ns dev.remote.core
   (:require [konserve.store :refer [new-mem-store]]
             [replikativ.p2p.fetch :refer [fetch]]
             [replikativ.platform-log :refer [warn info debug]]
