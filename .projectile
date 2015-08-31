@@ -1,0 +1,7 @@
+-/.cljs_node_repl
+-/.repl
+-/out
+-/resources/public/js/out
+-/test/dev/client/out
+-/target
+-/doc
