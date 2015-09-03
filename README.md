@@ -26,7 +26,7 @@ A prototype application, with an example deployment, can be found here: [topiq](
 ## Usage
 
 Add this to your project dependencies:
-[![Clojars Project](http://clojars.org/es.topiq/replikativ/latest-version.svg)](http://clojars.org/es.topiq/replikativ)
+[![Clojars Project](http://clojars.org/io.replikativ/replikativ/latest-version.svg)](http://clojars.org/io.replikativ/replikativ)
 
 Use this to store your application state, e.g. with `datascript` and `om`, to easily compose applications and data. You need to create a `peer` and potentially a `stage` or `pull-hooks`.
 
@@ -94,6 +94,8 @@ It is supposed to work from JavaScript as well, ping me and I will have a look w
   - :causal-order (of repo) -> :commit-graph (because that is what it is for this datatype, it corresponds to the causal-history for the crdt, but this is confusing and not specific enough)
   - :op (in publication) -> :downstream (because the operation is actually always a downstream operation)
   - stage :transactions -> :prepared (transaction is confusing and might be misunderstood as already applied, while :prepared makes clear that the operation is not yet applied.) [DONE]
+- do proper erlang error-handling with core.async
+- do not hold state values in memory in stage
 - Reactivate cljs: port full.async macros, add missing cljs code
 - Handle tag-table for messaging of records (transit?). Make all CRDT references records? Remove deprecated string serialization code.
 - Implement OR-set for topiq to mix strong and weak consistency
