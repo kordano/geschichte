@@ -1,21 +1,17 @@
 (ns dev.client.core
   (:require [weasel.repl :as repl]
             [konserve.store :refer [new-mem-store]]
-            [full.cljs.async :refer [throw-if-throwable] :include-macros true]
-
-            [replikativ.core :refer [client-peer wire]]
+            [replikativ.core :refer [wire client-peer]]
             [replikativ.p2p.fetch :refer [fetch]]
             [replikativ.p2p.block-detector :refer [block-detector]]
-            [cljs.core.async :refer [chan pub sub]]
-            )
-  (:require-macros [full.cljs.async :refer [go-try <? ]]
+            [cljs.core.async :refer [>! chan]]
+            [full.cljs.async :refer [throw-if-throwable]])
+  (:require-macros [full.cljs.async :refer [go-try <?]]
                    [cljs.core.async.macros :refer [go-loop]]))
 
 (repl/connect "ws://localhost:9001")
 
 (.log js/console "Greetings from replikativ i/o")
-
-(enable-console-print!)
 
 (defn start-local []
   (go-try
@@ -31,11 +27,15 @@
 
 (comment
 
+(start-local)
 
-  (start-local)
+
   
-  (go-try
-   (println (<? in)))
+  (go-loop [msg (<? in)]
+    (when msg
+      (println msg)
+      (recur (<? in))))
+  
 
 (go-try
    (>! out {:type :sub/identities
@@ -44,21 +44,16 @@
             :id 43}))
 
   (go-try
-   (println (dissoc (<? in) :id)))
-
-
-  (go-try
    (>! out {:type :connect/peer
                :url "ws://127.0.0.1:9090/"
                :peer "STAGE"
             :id 101}))
+  
   (go-try
    (>! out {:identities {"john" {42 #{"master"}}},
              :peer "CLIENT",
              :type :sub/identities-ack
              :id :ignored}))
-  
-  
 
   (go-try
    (>! out {:type :pub/downstream,
@@ -72,16 +67,11 @@
                                         :description "Bookmark collection."
                                         :public false}}}}))
 
-
-  
-
-
   (go-try
    (>! out {:type :fetch/edn-ack
                :id 1001
                :values {1 {:transactions [[10 11]]}
                         2 {:transactions [[20 21]]}}}))
-
 
   (go-try
    (>! out {:type :fetch/edn-ack,
@@ -107,10 +97,5 @@
                                              :branches {"master" #{3}}},
                                         :description "Bookmark collection.",
                                         :public false}}}}))
-
-  
- (go-try
-  (.log js/console (<? in)))
- 
   )
 

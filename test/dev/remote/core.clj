@@ -12,10 +12,10 @@
 
 (defn initialize-remote []
   (let 
-      [handler (create-http-kit-handler! "ws://127.0.0.1:9090/")
+      [err-ch (chan)
+       handler (create-http-kit-handler! "ws://127.0.0.1:9090/" err-ch)
        ;; remote server to sync to
-       remote-store (<?? (new-mem-store))
-       err-ch (chan)
+       (def remote-store (<?? (new-mem-store)))
        _ (go-loop [e (<? err-ch)]
            (when e
              (warn "ERROR:" e)
@@ -24,8 +24,7 @@
                                        remote-store err-ch
                                        (comp (partial block-detector :remote)
                                              #_(partial logger log-atom :remote-core)
-                                             (partial fetch remote-store err-ch))))]
-    ))
+                                             (partial fetch remote-store err-ch))))]))
 
 
 (comment
@@ -34,4 +33,6 @@
 
   (start remote-peer)
 
+  
+  
   )
