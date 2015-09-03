@@ -4,6 +4,7 @@
             #?(:clj [replikativ.crdt.repo.impl :refer :all]
                :cljs [replikativ.crdt.repo.impl])
             #?(:clj [full.async :refer [<? go-try]])
+            #?(:cljs [full.cljs.async :refer [throw-if-throwable]])
             #?(:clj [clojure.core.async :as async
                      :refer [>! timeout chan alt! go put! go-loop sub unsub pub close!]]
                :cljs [cljs.core.async :as async

@@ -152,7 +152,7 @@
       (assoc repo
              :branches new-branches
              :commit-graph new-graph))
-    (catch Throwable e
+    (catch #?(:clj Throwable :cljs js/Error) e
       (throw (ex-info "Cannot apply downstream operation."
                       {:error e
                        :op op

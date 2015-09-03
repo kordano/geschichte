@@ -8,6 +8,7 @@
             [konserve.protocols :refer [-assoc-in -exists? -get-in -update-in
                                         -bget -bassoc]]
             [clojure.set :as set]
+            #?(:cljs [full.cljs.async :refer [throw-if-throwable]])
             #?(:clj [clojure.java.io :as io])
             #?(:clj [clojure.core.async :as async
                       :refer [>! timeout chan put! pub sub unsub close!]]

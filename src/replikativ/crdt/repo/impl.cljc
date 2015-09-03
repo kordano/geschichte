@@ -9,6 +9,7 @@
                                           PPullOp -pull]]
             [replikativ.platform-log :refer [debug info error]]
             #?(:clj [full.async :refer [go-try go-loop-try go-for <?]])
+            #?(:cljs [full.cljs.async :refer [throw-if-throwable]])
             [replikativ.crdt.repo.repo :as repo]
             [replikativ.crdt.repo.meta :refer [downstream isolate-branch]]
             [konserve.protocols :refer [-exists? -assoc-in -get-in -bassoc -update-in]]

@@ -11,6 +11,7 @@
                  [org.clojure/clojurescript "1.7.107"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [com.cognitect/transit-clj "0.8.275"]
+                 [com.cognitect/transit-cljs "0.8.225"]
                  [http-kit "2.1.19"]
                  [http.async.client "0.6.0"]
                  [es.topiq/full.async "0.2.8-beta1"]
@@ -27,7 +28,7 @@
                                   [org.clojure/tools.nrepl "0.2.10"]]}}
   
   :plugins [[lein-cljsbuild "1.1.0"]
-            [lein-figwheel "0.3.7"]
+           [lein-figwheel "0.3.7"]
             [codox "0.8.13"]]
 
   :codox {:sources ["src"]}
@@ -36,13 +37,7 @@
   
   :cljsbuild
   {:builds
-   [{:id "brepl"
-     :source-paths ["test/dev/client"]
-     :compiler
-     {:output-to "test/dev/client/out/main.js"
-      :output-dir "test/dev/client/out"
-      :optimizations :none
-      :pretty-print true}}
+   [
     {:id "bdev"
      :source-paths ["test/dev/client"]
      :figwheel true
@@ -58,7 +53,13 @@
      :compiler
      {:output-to "resources/public/js/main.js"
       :optimizations :simple
-      :pretty-print true}}]}
+      :pretty-print true}}
+    {:id "min"
+     :source-paths ["src"]
+     :compiler
+     {:output-to "resources/public/js/replikativ_min.js"
+      :optimizations :advanced
+      :pretty-print false}}]}
 
   :documentation
   {:files {"index"
