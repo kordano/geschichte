@@ -138,8 +138,8 @@ THIS DOES NOT COMMIT YET, you have to call commit! explicitly afterwards. It can
                        :transactions transactions})))
     (let [{{:keys [peer eval-fn]} :volatile
            {:keys [subs]} :config} @stage]
-      (locking stage
-        (swap! stage update-in [user repo :prepared branch] concat transactions))))))
+      (->> (swap! stage update-in [user repo :prepared branch] concat transactions)
+           #?(:clj (locking stage)))))))
 
 (defn transact-binary
   "Transact a binary blob to reference it later, this only prepares a transaction and does not commit.
