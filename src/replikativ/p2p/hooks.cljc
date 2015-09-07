@@ -38,7 +38,8 @@
            [repo-id pub] repos
            :let [a-crdt (<? (pub->crdt store [user repo-id] (:crdt pub)))
                  a-crdt (-downstream a-crdt (:op pub))]
-           branch (if (extends? PHasIdentities (type a-crdt))
+           branch (if #?(:clj (extends? PHasIdentities (type a-crdt))
+                         :cljs (.. a-crdt -prototype isPrototypeOf PHasIdentities))
                     (-identities a-crdt)
                     [nil])
            [[a-user a-repo a-branch]
