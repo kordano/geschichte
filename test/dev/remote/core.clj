@@ -2,6 +2,7 @@
   (:require [konserve.store :refer [new-mem-store]]
             [replikativ.p2p.fetch :refer [fetch]]
             [replikativ.platform-log :refer [warn info debug]]
+            [replikativ.crdt.repo.realize :refer :all]
             [replikativ.p2p.block-detector :refer [block-detector]]
             [replikativ.platform :refer [create-http-kit-handler! start stop]]
             [replikativ.crdt.repo.stage :as s]
@@ -52,12 +53,19 @@
   
   (<?? (s/transact (:stage remote-state)
                    ["kordano@replikativ.io" repo-id "master"]
-                   '(fn [old params] params)
+                   '(fn [old params] (inc old))
                    42
                    ))
 
   (<?? (s/commit! (:stage remote-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
-
+  
+  
+  
   (-> remote-state :store :state deref clojure.pprint/pprint)
+
+  (-> remote-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
+
+  
+  
   
   )
