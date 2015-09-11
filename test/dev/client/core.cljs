@@ -32,8 +32,6 @@
 
 (enable-console-print!)
 
-(def log-atom (atom {}))
-
 (def eval-fns
   {'(fn [old params] params) (fn [old params] params)
    '(fn [old params] (inc old)) (fn [old params] (inc old))
@@ -44,10 +42,10 @@
   (go-try
    (let [local-store (<? (new-mem-store))
          err-ch (chan)
+         log-atom (atom {})
          local-peer (client-peer "CLIENT" local-store err-ch
-                                 (comp (partial block-detector :local)
+                                 (comp (partial logger log-atom :local-core)
                                        (partial hook hooks local-store)
-                                       (partial logger log-atom :local-core)
                                        (partial fetch local-store err-ch)))
          stage (<? (create-stage! "kordano@replikativ.io" local-peer err-ch eval-fns))
          _ (go-loop [e (<? err-ch)]
@@ -56,25 +54,26 @@
               (recur (<? err-ch))))]
      {:store local-store
       :stage stage
+      :log log-atom
       :error-chan err-ch
-      :peer local-peer
-      :comm [in out]})))
+      :peer local-peer})))
 
 
 (comment
-
-  (go-try
-   (def client-state (<? (start-local))))
-
-  (go-try
-   (<? (connect! (:stage client-state) uri)))
   
-  (go-try
-   (<? (subscribe-repos! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}})))
 
-
+  (go-try (def client-state (<? (start-local))))
+  
+  (go-try (<? (subscribe-repos! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}})))
+  
+  (go-try (<? (connect! (:stage client-state) uri)))
+  
   (println (-> client-state :stage deref :config))
+
+
+  (println (-> client-state :log deref))
   
-  @log-atom
+  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
+
   
   )  
