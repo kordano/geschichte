@@ -33,7 +33,7 @@ platform-wide reader setup."
                                                     (with-meta
                                                       (transit/read
                                                        reader
-                                                       (str (js/String. (.. % -target -result))))
+                                                       (js/String. (.. % -target -result)))
                                                       {:host host})))
                          (.readAsText fr (.-message evt)))))
       (events/listen goog.net.WebSocket.EventType.CLOSED
@@ -47,7 +47,6 @@ platform-wide reader setup."
        (take! out
               (fn [m]
                 (when m
-                  (debug "Sending: " m)
                   (let [writer (transit/writer :json)]
                     (.send channel (js/Blob. #js [(transit/write writer m)])))
                   (sender))))))
