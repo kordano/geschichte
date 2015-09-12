@@ -1,6 +1,6 @@
-#+Title: replikativ.io
-#+Author: Konrad Kühne, Christian Weilbach
-#+Email: konrad@replikativ.io, christian@replikativ.io
+#+Title: replikativ
+#+Author: Christian Weilbach
+#+Email: christian@replikativ.io
 
 #+OPTIONS: reveal_center:t reveal_progress:t reveal_history:t reveal_control:t
 #+OPTIONS: reveal_mathjax:t reveal_rolling_Links:t reveal_keyboard:t reveal_overview:t num:nil
@@ -18,123 +18,15 @@
 # +REVEAL_POSTAMBLE: <p> Geoglyphs FP-prototype by C. Weilbach </p>
 
 
-* Motivation
-  - *do not lose any data!*
-  - build distributed applications
-  - no complexities between frontend and backend
-
-#+BEGIN_NOTES
-- available and consistent
-#+END_NOTES
-
-
-* CDVCS
-  - git for data
-  - /reformulated/ as CRDT
-  - *DAG* + *LCA* on branch heads
-
-#+BEGIN_NOTES
-- online LCA with LRU cache for *O(n)*
-- proofed in paper, depends on LCA mostly
-#+END_NOTES
-
-** Example scenario t=0
-#+REVEAL_HTML: <img src="./syncfree-sc-0.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
-
-** Example scenario t=1
-#+REVEAL_HTML: <img src="./syncfree-sc-1.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
-
-** Example scenario t=2
-#+REVEAL_HTML: <img src="./syncfree-sc-2.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
-
-** Example scenario t=3
-#+REVEAL_HTML: <img src="./syncfree-sc-3.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
-
-
-** Details
-   - /conflict merging/ in CRDT value
-   - decoupled from replication
-   - merge divergence tradeoffs
-   - different consistency scenarios possible
-
-#+BEGIN_NOTES
-   - possible to resolve at any point later (but more than MVCC: CouchDB, Riak)
-   - availabilty vs. consistency reduce ability to merge (not commit) dependent on number
-     + commits in commit-graph or
-     + heads in branch (LCA cost)
-#+END_NOTES
-
-
-
-* Replication
-  - op-based CRDTs
-  - state-based on sync with merkle-hash
-  - open /gossip-like/ broadcast between peers
-  - cross-platform =JavaScript= + =Java= through *Clojure*
-  - global namespace
-#+BEGIN_SRC clojure
-{user {cdvcs metadata, or-set metadata}, ...}
-#+END_SRC
-
-
-#+BEGIN_NOTES
-  - passwordless 2-factor mail auth, trust-based
-  - antientropy
-  - architecture in backlog
-#+END_NOTES
-
-
-* CRDT integration
-  - protocol for CRDTs
-  - atomic cross-CRDT updates
-  - cross-CRDT value references
-  - late reduction of functions and parameters as txs
-
-#+BEGIN_NOTES
-- extension to new types possible
-- CRDT manages on-disk state format, maybe not ideal?
-- optimal Kolmogorov encoding possible
-- datascript (datalog) DB as value
-#+END_NOTES
-
-* Benchmark
-  file:commit_benchmark.png
-
-
-* Next steps
-  - port example application https://topiq.es
-  - model efficient datascript indexes
-    + OR-set for write heavy parts of transaction log
-  - implement erlang-like error-handling
-  - DynamoDB-like =DHT= vs. spanning tree autoconfiguration
-  - =core.typed= gradual typing with runtime checks at system boundary
-
-
-#+BEGIN_NOTES
-  - eval =swarm.js=
-  - Chord
-  - robustness
-  - The little Prover/ACL2, proofs for CRDTs inside of replikativ.io side-effect system
-  - implementation against protocols
-#+END_NOTES
-
-* References
-  - Draft version of Whitepaper: http://arxiv.org/abs/1508.05545
-
-* Pub-sub architecture
-  file:peering.png
-
->>>>>>> bb73e07d9e4eb03ded94970daf91ddd83503b077
 * Why?
 
 ** Data rules the world
-   - most big IT businesses /control/, /own/ and /sell/ =data= (services)
-   - /vendor-lockin/ into *DBs/Clouds/application-formats* are a form of
-     /domination/ and hence /highly profitable/
-   - most /important parts/ of the software stack are now available as
-     open-source
-   - /but/ more data than ever is /privatized/ in internet silos
-   - APIs are an /abonnement/ to your & other people's data
+   - most big IT businesses /control/, /own/ and /sell/ =data=
+   - /vendor-lockin/ into *DBs/Clouds/application-formats* form of
+     /domination/ $\Rightarrow$ /highly profitable/
+   - most /important parts/ of software stack now open-source
+   - /but/ more data than ever /privatized/ in internet silos
+   - APIs = /abonnement/ to your & other people's data
    - somebody else can /apply statistics/ on you
    - but you /cannot/ and /will never know/
 
@@ -181,14 +73,6 @@
 # the code is versioned and kept very safe
 
 
-*** SwiftCloud
-    - recent attempt to extend the cloud to the clients
-    - data is partially retained locally, local writes are possible
-      for /mergeable txs/
-    - but, has no /data-centric/ approach, lazy fetching
-    - /non-mergeable txs/ control in DC, focuses on
-      /scalability+latency/ of cloud solutions
-
 
 ** What if...
    - one could /clone/ the application state?
@@ -198,11 +82,7 @@
      single place under somebody else's control?
    - one could do /statistical analysis/ together with the users?
 
-<<<<<<< HEAD
-     
-=======
 
->>>>>>> bb73e07d9e4eb03ded94970daf91ddd83503b077
 * Problem
 #+BEGIN_VERSE
 Eng ist die Welt, und das Gehirn ist weit,
@@ -222,7 +102,7 @@ Wo eines Platz nimmt, muß das andre rücken,
 # e.g. updates to different parts of the state can conflict semantically etc.
 
 
-* Composing a solution: geschichte
+* Composing a solution: replikativ
   - nothing /fundamentally/ new
   - try to fit /well-proven/ concepts to the problem
   - develop with /browser/ first and don't settle on backend technology
@@ -230,18 +110,6 @@ Wo eines Platz nimmt, muß das andre rücken,
     - =ClojureScript= for =Browser=,
     - =Clojure= for the =JVM=
   - /journey/ of the last year:
-
-** Starting with "git"
-   - model state changes with =semi-lattice=
-   - /well-understood/ API of =pulling= / =merging= / =committing= etc.
-   - develop like a "native" app locally
-   - tradeoff of /conflict resolution/
-   - no networking or server-side development is needed by developer
-     $\Rightarrow$ easier development than current apps
-   - but:
-     - git has no concept of automatic distribution
-     - some operations need to be manually synchronized
-     - aborts on conflicts
 
 ** Partition global state space fairly
    - inspired by =Votorola=
@@ -261,6 +129,68 @@ Wo eines Platz nimmt, muß das andre rücken,
    file:peering.svg
 
 
+** Propagation
+   - /gossip/-like
+   - propagation happens like a /wave-front/
+   - novelty at least once over all edges to /subscribed/ peers
+   - peers need to be able to back metadata-updates up with
+     values \\
+     $\Rightarrow$ only accepted once /all data is available locally/ \\
+     $\Rightarrow$ /no stale reads/ possible
+
+* CDVCS
+  - git for data
+  - /reformulated/ as CRDT
+  - *DAG* + *LCA* on branch heads
+  - all referenced values are stored under =SHA-512= hashes and hence
+    cannot conflict, so the metadata CRDT solves synchronisation
+
+
+#+BEGIN_NOTES
+- online LCA with LRU cache for *O(n)*
+- proofed in paper, depends on LCA mostly
+#+END_NOTES
+
+
+** Starting with /git/
+   - model state changes with =semi-lattice=
+   - /well-understood/ API of =pulling= / =merging= / =committing= etc.
+   - develop like a "native" app locally
+   - tradeoff of /conflict resolution/
+   - no networking or server-side development is needed by developer
+     $\Rightarrow$ easier development than current apps
+   - but:
+     - git has no concept of automatic distribution
+     - some operations need to be manually synchronized
+     - aborts on conflicts
+
+** Example scenario t=0
+#+REVEAL_HTML: <img src="./syncfree-sc-0.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
+
+** Example scenario t=1
+#+REVEAL_HTML: <img src="./syncfree-sc-1.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
+
+** Example scenario t=2
+#+REVEAL_HTML: <img src="./syncfree-sc-2.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
+
+** Example scenario t=3
+#+REVEAL_HTML: <img src="./syncfree-sc-3.png"  style='float: none; margin-left: auto; margin-right: auto; border: none;'/>
+
+
+** Details
+   - /conflict merging/ in CRDT value
+   - decoupled from replication
+   - merge divergence tradeoffs
+   - different consistency scenarios possible
+
+#+BEGIN_NOTES
+   - possible to resolve at any point later (but more than MVCC: CouchDB, Riak)
+   - availabilty vs. consistency reduce ability to merge (not commit) dependent on number
+     + commits in commit-graph or
+     + heads in branch (LCA cost)
+#+END_NOTES
+
+
 
 ** P2P synchronisation with CRDTs
    - *Conflict-free Replicated DataTypes*
@@ -275,7 +205,7 @@ Wo eines Platz nimmt, muß das andre rücken,
 ** Metadata-structure
    - numbers are actually hash-uuids referencing values
 #+BEGIN_SRC clojure
-  {:causal-order {10 [], ;; root
+  {:commit-graph {10 [], ;; root
                   20 [10],
                   30 [20],
                   40 [10],
@@ -287,26 +217,6 @@ Wo eines Platz nimmt, muß das andre rücken,
 #+END_SRC
 
 
-** Is this a (state-based) CRDT?
-   - only "downstream" op is /merging/
-   - =causal-order= is a /growing/ graph without removals
-   - =branches= point to /tips/ in this graph
-   - /branch heads/ are a set
-   - /remove stale parents/ through =lowest-common-ancestor= (lub)
-     search
-   - /multiple branch heads/ can /safely/ occur at /any point/ of propagation
-   - conflict is part of the value, not of datatype
-
-** Propagation
-   - propagation happens like a /wave-front/
-   - at least once over all edges to /subscribed/ peers
-   - peers need to be able to back metadata-updates up with
-     values \\
-     $\Rightarrow$ only accepted once /all data is available locally/ \\
-     $\Rightarrow$ /no stale reads/ possible
-   - all referenced values are stored under =SHA-512= hashes and hence
-     cannot conflict, so the metadata CRDT solves synchronisation
-
 ** Commit structure
    - commits subsume an /arbitrary amount/ of transactions
    - transaction is composed of /source-code/ of a function &
@@ -317,22 +227,17 @@ Wo eines Platz nimmt, muß das andre rücken,
    - actual state can again be /composed of op-based CRDTs/ and hence
      have trivially mergeable transactions
 
-
-** Current network: Scheme 1
-   - /dumb/ pull-hooks
-   - merging at a single place otherwise /divergence/
-   - reduces "merge-bloat" on heavy load divergence, by /adaptively
-     delaying/ merges and reducing availability (backpressure?)
-   - server /pulls/ from anybody if possible into "its" repo
-   - everybody *pulls & merges* from server repo into their repo
-   - works, but /not yet benchmarked!/
-
-** Current network: Scheme 1.1
-   - merging on server only possible if /commutative/
-   - clients only pull
-
 * Demo
 
+* Benchmark
+  file:commit_benchmark.png
+
+
+* Coordination
+  - different coordination schemes possible
+  - user moderated conflict resolution
+  - data moderated conflict resolution (e.g. pull-hooks)
+  - addition of strong consistency protocols like Paxos
 
 * Scaling problems
    - /divergence/: latency $\Rightarrow$ conflicts $\Rightarrow$ merge-bloat
@@ -340,14 +245,33 @@ Wo eines Platz nimmt, muß das andre rücken,
    - mobile bandwidth can be /very expensive/
    - needs /hand-crafted/ design for application state like SwiftCloud
 
-** Recent steps
-   - plumbing
-   - make hash-fn /~10 times/ faster on =JVM=
-   - improve /kv-store/ and use /fast serialisation/ protocols
-   - carry /binary blobs/ up to 512 mib with very low =CPU= overhead
-     $\Rightarrow$ all application data including code could be packed
-     in repo and /bootstrapped/ in client
-   - improve /error-handling/ to comfortably use it from the =REPL=
+
+* Related work
+  - swarm.js
+  - https://github.com/sgrove/dato
+  - SwiftCloud
+  - Antidote built on RiakCore (syncfree)
+  - http://ipfs.io
+  - http://telepat.io
+
+* Next steps
+  - reactivate cljs port
+  - port example application https://topiq.es
+  - first release
+  - model efficient datascript indexes
+    + OR-set for write heavy parts of transaction log
+  - implement *erlang-like error-handling*
+  - DynamoDB-like =DHT= vs. spanning tree autoconfiguration
+  - =core.typed= gradual typing with runtime checks at system boundary
+
+
+#+BEGIN_NOTES
+  - eval =swarm.js=
+  - Chord
+  - robustness
+  - The little Prover/ACL2, proofs for CRDTs inside of replikativ.io side-effect system
+  - implementation against protocols
+#+END_NOTES
 
 ** Next steps
 
@@ -414,9 +338,8 @@ Wo eines Platz nimmt, muß das andre rücken,
      side-effects ;-) or "sustainable") it becomes enactionable
    - inspired by /Votorola/ ideas
 
-* Sources
-  - https://github.com/ghubber/geschichte
-  - http://zelea.com/project/votorola/home.html
+* References
+  - Draft version of Whitepaper: http://arxiv.org/abs/1508.05545
   - Marc Shapiro, Nuno Preguiça, Carlos Baquero, Marek Zawirski, A
     comprehensive study of Convergent and Commutative Replicated Data
     Types
@@ -427,3 +350,4 @@ Wo eines Platz nimmt, muß das andre rücken,
     collaborative editing system
   - Andrei Deftu, Jan Griebsch. A Scalable Conflict-free Replicated
     Set Data Type.
+  - http://zelea.com/project/votorola/home.html

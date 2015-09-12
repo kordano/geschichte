@@ -27,12 +27,15 @@ platform-wide reader setup."
     (doto channel
       (events/listen goog.net.WebSocket.EventType.MESSAGE
                      (fn [evt]
-                       (debug "receiving: " (-> evt .-message))
                        (let [reader (transit/reader :json)
                              fr (js/FileReader.)]
-                         (set! (.-onload fr) #(transit/read reader (.-result fr)))
-                         (put! in (with-meta (.readAsText fr (.-message evt))
-                                    {:host host})))))
+                         (set! (.-onload fr) #(put! in
+                                                    (with-meta
+                                                      (transit/read
+                                                       reader
+                                                       (str (js/String. (.. % -target -result))))
+                                                      {:host host})))
+                         (.readAsText fr (.-message evt)))))
       (events/listen goog.net.WebSocket.EventType.CLOSED
                      (fn [evt] (close! in) (.close channel) (close! opener)))
       (events/listen goog.net.WebSocket.EventType.OPENED
@@ -40,12 +43,12 @@ platform-wide reader setup."
       (events/listen goog.net.WebSocket.EventType.ERROR
                      (fn [evt] (error "ERROR:" evt) (close! opener)))
       (.open url))
-    (fn sender []
-      (take! out
-             (fn [m]
-               (when m
-                 (debug "sending: " m)
-                 (let [writer (transit/writer :json)]
-                   (.send channel (js/Blob. #js [(transit/write writer m)])))
-                 (sender)))))
+    ((fn sender []
+       (take! out
+              (fn [m]
+                (when m
+                  (debug "Sending: " m)
+                  (let [writer (transit/writer :json)]
+                    (.send channel (js/Blob. #js [(transit/write writer m)])))
+                  (sender))))))
     opener))

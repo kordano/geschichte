@@ -4,13 +4,16 @@
             [replikativ.platform-log :refer [warn info debug]]
             [replikativ.crdt.repo.realize :refer :all]
             [replikativ.p2p.block-detector :refer [block-detector]]
+            [replikativ.p2p.hash :refer [ensure-hash]]
+            [replikativ.p2p.log :refer [logger]]
+            [replikativ.p2p.hooks :refer [hook]]
             [replikativ.platform :refer [create-http-kit-handler! start stop]]
             [replikativ.crdt.repo.stage :as s]
             [replikativ.stage :refer [create-stage! connect! subscribe-repos!]]
             [replikativ.crdt.repo.repo :as repo]
-            [full.async :refer [<?? <? go-try] :include-macros true]
+            [full.async :refer [<?? <? go-try go-loop-try] :include-macros true]
             [clojure.core.async :refer [chan go-loop go]]
-            [replikativ.core :refer [server-peer wire]]))
+            [replikativ.core :refer [client-peer server-peer wire]]))
 
 (def uri "ws://127.0.0.1:31744")
 (def repo-id #uuid "8e9074a1-e3b0-4c79-8765-b6537c7d0c44")
@@ -42,30 +45,60 @@
     (start remote-peer)
     state))
 
+(def log-atom (atom {}))
+
+(def hooks (atom {[#".*"
+                   repo-id
+                    "master"]
+                  [["kordano@replikativ.io"
+                    repo-id
+                    "master"]]}))
+
+(defn start-local []
+  (go-try
+   (let [local-store (<? (new-mem-store))
+
+         err-ch (chan)
+         local-peer (client-peer "CLIENT" local-store err-ch
+                                 (comp (partial block-detector :local)
+                                       (partial hook hooks local-store)
+                                       (partial logger log-atom :local-core)
+                                       (partial fetch local-store err-ch)))
+         stage (<? (create-stage! "kordano@replikativ.io" local-peer err-ch eval-fns))
+         _ (go-loop [e (<? err-ch)]
+            (when e
+              (info "ERROR:" e)
+              (recur (<? err-ch))))]
+     {:store local-store
+      :stage stage
+      :error-chan err-ch
+      :peer local-peer})))
+
 
 (comment
 
   (def remote-state (init))
 
-  (clojure.pprint/pprint (:peer remote-state))
-  
   (<?? (subscribe-repos! (:stage remote-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
   
   (<?? (s/transact (:stage remote-state)
                    ["kordano@replikativ.io" repo-id "master"]
-                   '(fn [old params] (inc old))
-                   42
-                   ))
+                   '(fn [old params] params)
+                   45
+                   )) 
 
   (<?? (s/commit! (:stage remote-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
-  
-  
   
   (-> remote-state :store :state deref clojure.pprint/pprint)
 
   (-> remote-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
 
+  (def client-state (<?? (start-local)))
+
+  (<?? (connect! (:stage client-state) uri))
+
+  (<?? (subscribe-repos! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
   
-  
+  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
   
   )
