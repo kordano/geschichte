@@ -124,6 +124,7 @@
 * Pub-sub architecture
   file:peering.png
 
+>>>>>>> bb73e07d9e4eb03ded94970daf91ddd83503b077
 * Why?
 
 ** Data rules the world
@@ -197,7 +198,11 @@
      single place under somebody else's control?
    - one could do /statistical analysis/ together with the users?
 
+<<<<<<< HEAD
+     
+=======
 
+>>>>>>> bb73e07d9e4eb03ded94970daf91ddd83503b077
 * Problem
 #+BEGIN_VERSE
 Eng ist die Welt, und das Gehirn ist weit,
