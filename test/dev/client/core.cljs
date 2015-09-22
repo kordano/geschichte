@@ -43,9 +43,8 @@
    (let [local-store (<? (new-mem-store))
          err-ch (chan)
          log-atom (atom {})
-         local-peer (client-peer "CLIENT" local-store err-ch
+         local-peer (client-peer "CLJS CLIENT" local-store err-ch
                                  (comp (partial logger log-atom :local-core)
-                                       (partial hook hooks local-store)
                                        (partial fetch local-store err-ch)))
          stage (<? (create-stage! "kordano@replikativ.io" local-peer err-ch eval-fns))
          _ (go-loop [e (<? err-ch)]
@@ -74,6 +73,16 @@
   (println (-> client-state :log deref))
   
   (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
+  
 
+  (go-try
+   (<? (s/transact (:stage client-state)
+                   ["kordano@replikativ.io" repo-id "master"]
+                   '(fn [old params] params)
+                   999)))
+
+  
+  (go-try
+   (<? (s/commit! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}})))
   
   )  
