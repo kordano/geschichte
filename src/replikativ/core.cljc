@@ -84,7 +84,7 @@
                              identities (get-in sbs [user repo-id])]
                          [[user repo-id]
                           (if #?(:clj (extends? PHasIdentities (class crdt))
-                                 :cljs (.. crdt -prototype isPrototypeOf PHasIdentities))
+                                 :cljs (satisfies? crdt PHasIdentities))
                             (update-in pub [:op] #(-select-identities crdt identities %))
                             pub)]))
                (async/into [])
@@ -266,7 +266,6 @@
                            (when (and c (not= id sub-id))
                              (recur (<? subed-ch)))))
           (async/close! subed-ch)
-
           (>! out {:type :connect/peer-ack
                    :url url
                    :id id
