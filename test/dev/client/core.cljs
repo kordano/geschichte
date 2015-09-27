@@ -72,7 +72,7 @@
 
   (println (-> client-state :log deref))
   
-  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
+  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph println)
   
 
   (go-try
@@ -81,6 +81,7 @@
                    '(fn [old params] params)
                    999)))
 
+  (println (:stage client-state))
   
   (go-try
    (<? (s/commit! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}})))

@@ -106,6 +106,7 @@
   (<?? (subscribe-repos! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
   
   (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
+  
   (<?? (s/transact (:stage client-state)
                   ["kordano@replikativ.io" repo-id "master"]
                   '(fn [old params] params)

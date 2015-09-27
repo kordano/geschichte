@@ -138,6 +138,7 @@ THIS DOES NOT COMMIT YET, you have to call commit! explicitly afterwards. It can
                        :transactions transactions})))
     (let [{{:keys [peer eval-fn]} :volatile
            {:keys [subs]} :config} @stage]
+      (debug "Stage transact!")
       (->> (swap! stage update-in [user repo :prepared branch] concat transactions)
            #?(:clj (locking stage)))))))
 
