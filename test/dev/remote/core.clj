@@ -16,6 +16,7 @@
             [replikativ.core :refer [client-peer server-peer wire]]))
 
 (def uri "ws://127.0.0.1:31744")
+
 (def repo-id #uuid "8e9074a1-e3b0-4c79-8765-b6537c7d0c44")
 
 (def eval-fns
@@ -57,7 +58,6 @@
 (defn start-local []
   (go-try
    (let [local-store (<? (new-mem-store))
-
          err-ch (chan)
          local-peer (client-peer "CLJ CLIENT" local-store err-ch
                                  (comp (partial logger log-atom :local-core)
@@ -82,22 +82,35 @@
   (<?? (s/transact (:stage remote-state)
                    ["kordano@replikativ.io" repo-id "master"]
                    '(fn [old params] params)
-                   42
-                   )) 
+                   42)) 
 
   (<?? (s/commit! (:stage remote-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
   
   (<?? (s/transact (:stage remote-state)
                    ["kordano@replikativ.io" repo-id "master"]
+                   43)) 
+  
+  (<?? (s/commit! (:stage remote-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
+  
+   (<?? (s/transact (:stage remote-state)
+                   ["kordano@replikativ.io" repo-id "master"]
                    '(fn [old params] (inc old))
-                   43
-                   )) 
+                   44)) 
+
+   (<?? (s/commit! (:stage remote-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
+   
+    (<?? (s/transact (:stage remote-state)
+                   ["kordano@replikativ.io" repo-id "master"]
+                   '(fn [old params] (inc old))
+                   45)) 
 
   (<?? (s/commit! (:stage remote-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
   
+  
   (-> remote-state :store :state deref clojure.pprint/pprint)
 
-  (-> remote-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
+  (-> remote-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph count)
+  
 
   (def client-state (<?? (start-local)))
 
@@ -105,12 +118,12 @@
 
   (<?? (subscribe-repos! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
   
-  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
+  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph count)
   
   (<?? (s/transact (:stage client-state)
                   ["kordano@replikativ.io" repo-id "master"]
                   '(fn [old params] params)
-                  666))
+                  777))
 
   (<?? (s/commit! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}}))
    

@@ -27,7 +27,8 @@ platform-wide reader setup."
     (doto channel
       (events/listen goog.net.WebSocket.EventType.MESSAGE
                      (fn [evt]
-                       (let [reader (transit/reader :json)
+                       (let [reader (transit/reader :json {:handlers
+                                                           {"u" (fn [v] (cljs.core/uuid v))}})
                              fr (js/FileReader.)]
                          (set! (.-onload fr) #(put! in
                                                     (with-meta

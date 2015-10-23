@@ -127,6 +127,7 @@ THIS DOES NOT COMMIT YET, you have to call commit! explicitly afterwards. It can
   ([stage [user repo branch] trans-fn-code params]
    (transact stage [user repo branch] [[trans-fn-code params]]))
   ([stage [user repo branch] transactions]
+   (debug "Stage transact intro")
    (go-try
     (when-not (get-in @stage [user repo :state :branches branch])
       (throw (ex-info "Branch does not exist!"

@@ -5,7 +5,6 @@
             [clojure.string :as str]
             [replikativ.platform-log :refer [debug info warn error]]
             [konserve.platform :refer [read-string-safe]]
-            [hasch.benc :refer [IHashCoercion -coerce]]
             [full.async :refer [<? <?? go-try go-loop-try>]]
             [clojure.core.async :as async
              :refer [>! timeout chan alt!]]

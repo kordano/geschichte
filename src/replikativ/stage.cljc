@@ -44,6 +44,7 @@ This the update of the stage is not executed synchronously. Returns go
                                              (= (get-in stage-val [u id :stage/op]) :sub))]
                                [u id]))
                 ferr-ch (chan)]
+            (debug "Sync! -> Pubs: " pubs)
             (sub p :pub/downstream-ack pch)
             (sub p :fetch/edn fch)
             (go-loop-try> ferr-ch [to-fetch (:ids (<? fch))]

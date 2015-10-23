@@ -5,7 +5,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   
-  :source-paths ["src"]
+  :source-paths ["src" "test/dev"]
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.107"]
@@ -16,19 +16,20 @@
                  [http.async.client "0.6.0"]
                  [es.topiq/full.async "0.2.8-beta1"]
                  [kordano/full.cljs.async "0.1.3-alpha"]
-                 [es.topiq/hasch "0.3.0-beta3"]
+                 [io.replikativ/hasch "0.3.0-SNAPSHOT"]
                  [net.polyc0l0r/konserve "0.2.4-SNAPSHOT"]
-                 [com.cemerick/piggieback "0.2.1"]
                  [weasel "0.7.0" :exclusions [org.clojure/clojurescript]]
                  [com.cemerick/piggieback "0.2.1"]
                  [com.taoensso/timbre "4.0.2"]]
 
   :profiles {:dev {:dependencies [[midje "1.6.3"]
                                   [com.cemerick/piggieback "0.2.1"]
-                                  [org.clojure/tools.nrepl "0.2.10"]]}}
+                                  [org.clojure/tools.nrepl "0.2.11"]]
+                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+                   :figwheel {:nrepl-port 7888}
+                   :plugins [[lein-figwheel "0.4.1"]]}}
   
   :plugins [[lein-cljsbuild "1.1.0"]
-           [lein-figwheel "0.3.7"]
             [codox "0.8.13"]]
 
   :codox {:sources ["src"]}
@@ -37,10 +38,9 @@
   
   :cljsbuild
   {:builds
-   [
-    {:id "bdev"
+   [{:id "test"
      :source-paths ["test/dev/client"]
-     :figwheel true
+     ;:figwheel true
      :compiler
      {:main dev.client.core
       :asset-path "js/out"

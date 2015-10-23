@@ -19,8 +19,6 @@
 
 (def repo-id #uuid "8e9074a1-e3b0-4c79-8765-b6537c7d0c44")
 
-(.log js/console "Greetings from replikativ i/o")
-
 (def uri "ws://127.0.0.1:31744")
 
 (def hooks (atom {[#".*"
@@ -63,26 +61,41 @@
 
   (go-try (def client-state (<? (start-local))))
   
+  (go-try (<? (connect! (:stage client-state) uri)))
+  
   (go-try (<? (subscribe-repos! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}})))
   
-  (go-try (<? (connect! (:stage client-state) uri)))
   
   (println (-> client-state :stage deref :config))
 
-
   (println (-> client-state :log deref))
   
-  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph println)
-  
+  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph)
 
+  (->> client-state :store :state deref keys (filter vector?))
+  
+  (-> client-state :store :state deref (get ["kordano@replikativ.io" repo-id]) :state :commit-graph count)
+  
   (go-try
    (<? (s/transact (:stage client-state)
                    ["kordano@replikativ.io" repo-id "master"]
                    '(fn [old params] params)
                    999)))
 
+  
+  (-> client-state :stage deref (get-in ["kordano@replikativ.io" repo-id :prepared]) println)
+  
   (println (:stage client-state))
   
+  (go-try
+   (<? (s/commit! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}})))
+  
+  (go-try
+   (<? (s/transact (:stage client-state)
+                   ["kordano@replikativ.io" repo-id "master"]
+                   '(fn [old params] params)
+                   666)))
+
   (go-try
    (<? (s/commit! (:stage client-state) {"kordano@replikativ.io" {repo-id #{"master"}}})))
   
